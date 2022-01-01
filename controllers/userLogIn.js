@@ -2,7 +2,7 @@ const { User, validateUserLogIn } = require("../models/User");
 const bcrypt = require("bcrypt");
 
 module.exports.userLogIn = async (req, res, next) => {
-  // verifying the user's input  and returning if the verification fails
+  // verifying the user's input  and terminates if the verification fails
   const { error } = validateUserLogIn(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -17,7 +17,7 @@ module.exports.userLogIn = async (req, res, next) => {
   if (!validPassword)
     return res.status(400).send("Incorrect username or password ");
 
-  // returning a cookie to the user
+  // returning a token to the user
 
   const token = user.generateAuthToken();
 

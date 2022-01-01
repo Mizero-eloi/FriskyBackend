@@ -21,7 +21,7 @@ module.exports.userRegistration = async (req, res, next) => {
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(user.password, salt);
-    // saving the user and providing the token
+    // saving the user and providing them token
     await user.save();
     const token = user.generateAuthToken();
     return res.header("x-auth-token", token).send(_.pick(user, ["email"]));
