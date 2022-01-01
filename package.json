@@ -1,0 +1,32 @@
+{
+  "name": "FriskyBackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mizero-eloi/FriskyBackend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mizero-eloi/FriskyBackend/issues"
+  },
+  "homepage": "https://github.com/Mizero-eloi/FriskyBackend#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.1",
+    "config": "^3.3.6",
+    "debug": "^4.3.2",
+    "express": "^4.17.2",
+    "joi": "^17.5.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "mongoose": "^6.1.4",
+    "nodemon": "^2.0.15"
+  }
+}

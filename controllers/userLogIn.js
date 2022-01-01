@@ -1,0 +1,25 @@
+const { User, validateUserLogIn } = require("../models/User");
+const bcrypt = require("bcrypt");
+
+module.exports.userLogIn = async (req, res, next) => {
+  // verifying the user's input  and returning if the verification fails
+  const { error } = validateUserLogIn(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  // Verifying if the given email is correct
+
+  let user = await User.findOne({ email: req.body.email });
+  if (!user) return res.status(400).send("Incorrect username or password ");
+
+  // Verifying if the password
+
+  const validPassword = await bcrypt.compare(req.body.password, user.password);
+  if (!validPassword)
+    return res.status(400).send("Incorrect username or password ");
+
+  // returning a cookie to the user
+
+  const token = user.generateAuthToken();
+
+  return res.header("x-auth-token", token).send("Logged In successfully !");
+};
