@@ -3,8 +3,8 @@ const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
 const challengeSchema = new mongoose.Schema({
   name: {
-    type: String,
-    minlength: 5,
+   type: String,
+    minlength: 2,
     maxlength: 50,
     required: true
   },
@@ -45,12 +45,10 @@ const challengeSchema = new mongoose.Schema({
          profile: {
             type: String,
             minlength: 5,
-            maxlength: 50,
+            maxlength: 50, 
          },
          challengeVideo: {
             type: String,
-            minlength: 5,
-            maxlength: 50,
          },
          votes: {
            type: [String]
@@ -60,7 +58,7 @@ const challengeSchema = new mongoose.Schema({
       })
 
   },
-  participant: {
+  participants: {
       type: [new mongoose.Schema({
          name: {
             type: String,
@@ -75,8 +73,6 @@ const challengeSchema = new mongoose.Schema({
          },
          challengeVideo: {
             type: String,
-            minlength: 5,
-            maxlength: 50,
             required: true
          },
          votes: {
@@ -112,11 +108,10 @@ const challengeSchema = new mongoose.Schema({
 
 const Challenge = mongoose.model("challenge", challengeSchema);
 
-
 const validateChallengePost = (challenge) => {
   const schema = Joi.object().keys({
     challengerId: Joi.objectId().required(),
-    name: Joi.string().min(5).max(255).required(),
+    name: Joi.string().min(2).max(255).required(),
     type: Joi.string().min(4).max(6).required(),
     prize: Joi.string().min(5).max(255).required(),
     deadLineToVote: Joi.date().required(),
