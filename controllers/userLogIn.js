@@ -1,9 +1,9 @@
-const { User, validateUserLogIn } = require("../models/User");
+const { User, validateUserEntry } = require("../models/User");
 const bcrypt = require("bcrypt");
 
 module.exports.userLogIn = async (req, res, next) => {
   // verifying the user's input  and terminates if the verification fails
-  const { error } = validateUserLogIn(req.body);
+  const { error } = validateUserEntry(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
   // Verifying if the given email is correct

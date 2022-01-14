@@ -1,12 +1,11 @@
 const express = require("express");
 const multer  =  require("multer");
 const { makeChallenge, postChallengeVideoWhileMakingChallenge, uploadChallengeCoverPhoto, joinChallenge } = require("../controllers/challengeController");
-const auth = require("../middleware/auth");
 const validateParameterId = require("../middleware/validateParameterId");
 
 // configuring multer and indicating the destination folder
 const storage = multer.diskStorage({
-    destination: function (req, file, cb){
+    destination: function (req, file, cb){ 
         cb(null, './uploads');
     },
     filename: function (req, file, cb){
@@ -51,9 +50,9 @@ const imageUpload = multer({storage: Imagestorage, limits: {
 
 const router = express.Router();
 
-router.post("/:challengeId", upload.single("challengeVideo"), postChallengeVideoWhileMakingChallenge);
-router.post("/uploadChallengeCoverphoto/:challengeId",imageUpload.single("coverPhoto"),uploadChallengeCoverPhoto);
-router.post("/joinChallenge/:challengeId",validateParameterId("challengeId"),auth, upload.single("challengeVideo"),joinChallenge);
+router.post("/:challengeId",validateParameterId("challengeId"), upload.single("challengeVideo"), postChallengeVideoWhileMakingChallenge);
+router.post("/uploadChallengeCoverphoto/:challengeId",validateParameterId("challengeId"),imageUpload.single("coverPhoto"),uploadChallengeCoverPhoto);
+router.post("/joinChallenge/:challengeId",validateParameterId("challengeId"), upload.single("challengeVideo"),joinChallenge);
 router.post("/",makeChallenge);
 
 module.exports = router;
