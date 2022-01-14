@@ -1,11 +1,11 @@
-const { User, validateUserRegistration } = require("../models/User");
+const { User, validateUserEntry, validateUserProfile } = require("../models/User");
 const _ = require("lodash");
 const bcrypt = require("bcrypt");
 
 module.exports.userRegistration = async (req, res, next) => {
   // validate the user's given data and return if it is not valid
   try {
-    const { error } = validateUserRegistration(req.body);
+    const { error } = validateUserEntry(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
     // checking if the user  already exists and return it true

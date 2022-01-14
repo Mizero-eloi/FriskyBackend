@@ -1,6 +1,7 @@
 const { validateChallengePost, Challenge } = require("../models/ChallengeModel");
 const { User } = require("../models/User");
 const _ = require("lodash");
+const updateCollection = require("../reusable/updateCollection");
 
 module.exports.makeChallenge = async (req, res, next) => {
     try{
@@ -38,46 +39,18 @@ module.exports.makeChallenge = async (req, res, next) => {
 
 
 }
-
+ 
 
 
 module.exports.postChallengeVideoWhileMakingChallenge = async (req, res, next) => { 
-    try{
-        // Validating if the given challenge exists & updating if ever it finds the challenge
-        const challenge = await Challenge.findByIdAndUpdate(req.params.challengeId, {
-            $set:{
-                "challenger.challengeVideo": req.file.path
-            }
-        }, {new: true});
-        
-        if(!challenge) return res.status(400).send("Challenge not found !");
-    
-        res.status(200).send(challenge);
-
-    }catch(ex){
-        res.status(500).send(ex.message); 
-        console.log(ex);
-    }
-
+   await updateCollection(Challenge, req.params.challengeId, {"challenger.challengeVideo": req.file.path}, res);
+   console.log("I've been called");
 }
 
 
+
 module.exports.uploadChallengeCoverPhoto = async (req, res, next) => { 
-    try{
-        // Validating if the given challenge exists & updating if ever it finds the challenge
-        const challenge = await Challenge.findByIdAndUpdate(req.params.challengeId, {
-            $set:{
-                "coverPhoto": req.file.path
-            }
-        }, {new: true});
-    
-        res.status(200).send(challenge);
-
-    }catch(ex){
-        res.status(500).send("Something went wrong");
-        console.log(ex);
-    }
-
+    await updateCollection(Challenge, req.params.challengeId, {"coverPhoto": req.file.path}, res);
 }
 
 
