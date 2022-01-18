@@ -1,8 +1,12 @@
-const { validateChallengePost, Challenge } = require("../models/ChallengeModel");
+const { validateChallengePost, Challenge, validateChallengeSomeone } = require("../models/ChallengeModel");
 const { User } = require("../models/User");
 const _ = require("lodash");
+// const mongoose = require("mongoose");
+// const Fawn = require("fawn");
 const updateCollection = require("../reusable/updateCollection");
 
+
+// Fawn.init("mongodb://localhost/Friskygoose");
 module.exports.makeChallenge = async (req, res, next) => {
     try{
         // validating the user's input(for make challenge form )
@@ -22,7 +26,6 @@ module.exports.makeChallenge = async (req, res, next) => {
             },
             name: req.body.name,
             prize: req.body.prize || null ,
-            type: req.body.type,
             deadLineToVote: req.body.deadLineToVote,
             deadLineTimeToVote: req.body.deadLineTimeToVote
         })
@@ -30,7 +33,7 @@ module.exports.makeChallenge = async (req, res, next) => {
         // Saving the open challenge and returning the response to the client
     
         await challenge.save();
-        res.status(200).send(_.pick(challenge, ["challenger._id","challenger.challengeVideo","name", "prize", "type", "deadLineToVote", "deadLineTimeToVote"]));
+        res.status(200).send(_.pick(challenge, ["challenger._id","challenger.challengeVideo","name", "prize", "deadLineToVote", "deadLineTimeToVote"]));
 
     }catch(ex){
         res.status(500).send("Something went wrong !!");
@@ -43,8 +46,23 @@ module.exports.makeChallenge = async (req, res, next) => {
 
 
 module.exports.postChallengeVideoWhileMakingChallenge = async (req, res, next) => { 
-   await updateCollection(Challenge, req.params.challengeId, {"challenger.challengeVideo": req.file.path}, res);
-   console.log("I've been called");
+//    await updateCollection(Challenge, req.params.challengeId, {"challenger.challengeVideo": req.file.path}, res);
+
+    try{
+        // Validating if the given challenge exists & updating if ever it finds the challenge
+        const challenge = await Challenge.findByIdAndUpdate(req.params.challengeId);
+        if(!challenge) return res.status(400).send("Challenge does not exist !");
+    
+        challenge.challenger.challengeVideo.push(req.file.path);
+    
+        // Saving the challenge
+        await challenge.save();
+        res.status(200).send(challenge);
+        
+    }catch(ex){
+        res.status(500).send("Something went wrong");
+        console.log(ex);    
+    }
 }
 
 
@@ -52,6 +70,54 @@ module.exports.postChallengeVideoWhileMakingChallenge = async (req, res, next) =
 module.exports.uploadChallengeCoverPhoto = async (req, res, next) => { 
     await updateCollection(Challenge, req.params.challengeId, {"coverPhoto": req.file.path}, res);
 }
+
+module.exports.challengeSomeone = async (req, res, next) => {
+    try{
+        // validating the challenge inputs
+        const { error } = validateChallengeSomeone(req.body);
+        if (error) return res.status(400).send(error.details[0].message);
+
+        
+        // Checking if the challenged person exists
+        let thechallenged = await User.findOne({username: req.body.thechallenged});
+        if (!thechallenged) return res.status(400).send("Oops ! user does not exists !");
+
+        // Checking if the challenger is not the same as the challenged
+
+        if(thechallenged.username === req.user.username) return res.status(403).send("Permission denied. You can not challenge yourself");
+        
+        // Creating the challenge 
+
+        const challenge = new Challenge({
+            challenger: {
+                _id:req.user._id,
+                name: req.user.username,
+                profile: req.user.profile,
+            },
+            thechallenged:{
+                _id: thechallenged._id,
+                name: thechallenged.username,
+                profile: thechallenged.profile,
+
+            },
+            name: req.body.name,
+            prize: req.body.prize,
+            
+        })
+
+
+        // Saving the challenge 
+        await challenge.save()
+        return res.status(200).send(challenge);
+
+    }catch(ex){
+        res.status(500).send("Something went wrong !!");
+        console.log(ex);
+
+    }
+
+
+ }
 
 
 module.exports.joinChallenge = async (req, res, next) => { 
@@ -66,19 +132,47 @@ module.exports.joinChallenge = async (req, res, next) => {
     if(!challenge) return res.status(400).send("Challenge does not exist !");
     
     // Checking if the user is not already in the competition 
-    const competitor = challenge.participants.length > 0 && challenge.participants.filter(p => p._id == participant._id);
+    let competitor = challenge.participants.length > 0 && challenge.participants.filter(p => p._id == participant._id);
     if(competitor) return res.status(400).send("You are already a competitor");
 
-    // Adding the participant to the competition
+// try{
+//     await new Fawn.Task()
+//           .update("challenges", {_id: mongoose.Types.ObjectId(req.params.challengeId)}, {
+//               $push: {
+//                   participants: {
+//                       name: participant.username,
+//                       profile: participant.profile
+//                   }
+//               } 
+//           })
+//           .run({useMongoose: true});
 
-    challenge.participants.push({
-            name: participant.username || "eloimizero",
-            profile: participant.profile || "eloi's profile",
-            challengeVideo: req.file.path
-        })
+// }catch(ex){
+//     console.log(ex);
+// }
 
-    await challenge.save()
+    // .update("challenges", {_id: challenge._id, "participants.name": participant.username}, {
+    //     $push: {
+    //         "participants.$.challengeVideo": req.file.path
+    //     }
+    // })
     
+    challenge = await Challenge.findByIdAndUpdate(challenge._id, {
+        $push: {
+            participants: {
+                name: participant.username,
+                profile: participant.profile
+            }
+        }
+    }, {new: true})
+
+
+    challenge = await Challenge.findOneAndUpdate({_id: challenge._id, "participants.name": participant.username}, {
+        $push: {
+            "participants.$.challengeVideo": req.file.path
+        }
+    }, {new: true})
+
     
     res.status(200).send(challenge.participants); 
 
