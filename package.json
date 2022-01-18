@@ -23,6 +23,7 @@
     "config": "^3.3.6",
     "debug": "^4.3.2",
     "express": "^4.17.2",
+    "fawn": "^2.1.5",
     "joi": "^17.5.0",
     "joi-objectid": "^4.0.2",
     "jsonwebtoken": "^8.5.1",
