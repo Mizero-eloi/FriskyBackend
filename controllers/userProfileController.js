@@ -12,7 +12,7 @@ module.exports.userProfile = async (req, res, next) => {
 
   // Checking if the username does already exists
   let username = await User.findOne({ username: req.body.username });
-  if (username) return res.status(400).send("username does already exists ! ");
+  if (username & username !== req.user.username) return res.status(400).send("username does already exists ! ");
 
   // updating the user's profile
   await updateCollection(User, req.params.userId,

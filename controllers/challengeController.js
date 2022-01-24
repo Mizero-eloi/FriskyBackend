@@ -16,13 +16,17 @@ module.exports.makeChallenge = async (req, res, next) => {
         // Checking if the challenger(person making a challenge) is registered 
         const challenger = await User.findById(req.body.challengerId);
         if(!challenger) return res.status(400).send("User does not exist");
-    
+
+        // Checking if the challenge does already exist
+        let challenge = await Challenge.findOne({name: req.body.name});
+        if(challenge) return res.status(400).send("The Challenge does already exists");
+
         // formulating the open challenge object 
-        const challenge = new Challenge({
+        challenge = new Challenge({
             challenger: {
                 _id:challenger._id,
-                name: "eloimizero" || null,
-                profile: challenger.profile || null,
+                name: challenger.username,
+                profile: challenger.profile,
             },
             name: req.body.name,
             prize: req.body.prize || null ,
@@ -85,10 +89,17 @@ module.exports.challengeSomeone = async (req, res, next) => {
         // Checking if the challenger is not the same as the challenged
 
         if(thechallenged.username === req.user.username) return res.status(403).send("Permission denied. You can not challenge yourself");
+
+        
+        // Checking if the challenge does already exist
+        let challenge = await Challenge.findOne({name: req.body.name});
+        if(challenge) return res.status(400).send("The Challenge does already exists");
+        
+
         
         // Creating the challenge 
 
-        const challenge = new Challenge({
+        challenge = new Challenge({
             challenger: {
                 _id:req.user._id,
                 name: req.user.username,
@@ -123,9 +134,7 @@ module.exports.challengeSomeone = async (req, res, next) => {
 module.exports.joinChallenge = async (req, res, next) => { 
     try{
     // Checking if the logged user is in our database
-    const participant = await User.findById(req.user._id).select({username: 1, profile: 1, _id: 1});
-    if(!participant) return res.status(400).send("User does not exist !");
-
+    const participant = req.user;
 
     // checking if the given challenge exists 
     let challenge = await Challenge.findById(req.params.challengeId);
@@ -135,27 +144,6 @@ module.exports.joinChallenge = async (req, res, next) => {
     let competitor = challenge.participants.length > 0 && challenge.participants.filter(p => p._id == participant._id);
     if(competitor) return res.status(400).send("You are already a competitor");
 
-// try{
-//     await new Fawn.Task()
-//           .update("challenges", {_id: mongoose.Types.ObjectId(req.params.challengeId)}, {
-//               $push: {
-//                   participants: {
-//                       name: participant.username,
-//                       profile: participant.profile
-//                   }
-//               } 
-//           })
-//           .run({useMongoose: true});
-
-// }catch(ex){
-//     console.log(ex);
-// }
-
-    // .update("challenges", {_id: challenge._id, "participants.name": participant.username}, {
-    //     $push: {
-    //         "participants.$.challengeVideo": req.file.path
-    //     }
-    // })
     
     challenge = await Challenge.findByIdAndUpdate(challenge._id, {
         $push: {
@@ -183,3 +171,38 @@ module.exports.joinChallenge = async (req, res, next) => {
 
 
 }
+
+
+module.exports.unJoinChallenge = async (req, res, next) => {
+
+    try{
+        // Checking if the logged user is in our database
+        const participant = req.user;
+    
+        // checking if the given challenge exists 
+        let challenge = await Challenge.findById(req.params.challengeId);
+        if(!challenge) return res.status(400).send("Challenge does not exist !");
+        
+        // Checking if the user is in the competition 
+        let competitor = challenge.participants.length > 0 && challenge.participants.filter(p => p._id == participant._id);
+        if(!competitor) return res.status(400).send("You are not  in a  competition");
+    
+        
+        challenge = await Challenge.findByIdAndUpdate(challenge._id, {
+            $pull: {
+                participants: {
+                    name: participant.username
+                }
+            }
+        }, {new: true})
+    
+        
+        res.status(200).send(challenge.participants); 
+    
+        }catch(ex){
+            res.status(500).send("Something went wrong");
+            console.log(ex);
+        }
+    
+
+ }
