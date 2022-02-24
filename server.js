@@ -25,9 +25,6 @@ const swaggerOptions = {
   apis: ["./routes/*.js"],
 };
 
-// const swaggerDocs = swaggerJsDoc(swaggerOptions);
-// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-// mongodb+srv://eloi:ae789789@frisky.co2th.mongodb.net/Frisky
 mongoose
   .connect(config.get("dbConnectionString"), {
     useNewUrlParser: true,
