@@ -3,9 +3,10 @@ const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
 const challengeSchema = new mongoose.Schema({
   name: {
-   type: String,
+    type: String,
     minlength: 2,
     maxlength: 50,
+    unique: true,
     required: true
   },
   prize: {

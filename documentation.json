@@ -1,0 +1,459 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentation of all Frisky Apis",
+    "version": "1.0.0",
+    "Title": "Frisky apis",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": { "name": "Frisky Devs" },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "tags": [
+    {
+      "name": "User",
+      "description": "Apis about user authetication, user profile,..."
+    },
+    {
+      "name": "Challenge",
+      "description": "All apis of challenge"
+    }
+  ],
+  "paths": {
+    "/signup": {
+      "post": {
+        "tags": ["user"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "email": {
+                "type": "string",
+                "example": "friskyDev@gmail.com"
+              },
+              "password": { "type": "string", "example": "12345" }
+            }
+          }
+        ],
+        "schema": { "$ref": "#/definitions/User" },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "$ref": "#/definitions/User"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": ["user"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "email": {
+                "type": "string",
+                "example": "friskyDev@gmail.com"
+              },
+              "password": { "type": "string", "example": "12345" }
+            }
+          }
+        ],
+        "schema": { "$ref": "#/definitions/User" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/User"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/userProfile/{userId}": {
+      "post": {
+        "tags": ["user"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "mizero"
+              },
+              "username": {
+                "type": "string",
+                "example": "afroKiller"
+              },
+              "birthDate": {
+                "type": "string",
+                "example": "01/14/2022"
+              },
+              "gender": {
+                "type": "string",
+                "example": "male"
+              },
+              "bio": {
+                "type": "string",
+                "example": "let's dance 🤣😎😎"
+              }
+            }
+          }
+        ],
+        "schema": { "$ref": "#/definitions/UserProfile" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/UserProfile"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/userProfile/profilePicture/{userId}": {
+      "post": {
+        "tags": ["user"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "formData",
+            "name": "profilePicture",
+            "type": "file"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/User" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/User"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/makeChallenge": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "challengerId": {
+                "type": "string",
+                "example": "6214e67de276afedcb7592dc"
+              },
+              "name": {
+                "type": "string",
+                "example": "downChallenge"
+              },
+              "prize": {
+                "type": "string",
+                "example": "20000 frw"
+              },
+              "deadLineToVote": {
+                "type": "string",
+                "example": "01/14/2022"
+              },
+              "deadLineTimeToVote": {
+                "type": "string",
+                "example": "00:45"
+              }
+            }
+          }
+        ],
+        "schema": { "$ref": "#/definitions/Challenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/makeChallenge/{challengeId}": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "formData",
+            "name": "challengeVideo",
+            "type": "file"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/Challenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/makeChallenge/uploadChallengeCoverphoto/{challengeId}": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "formData",
+            "name": "coverPhoto",
+            "type": "file"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/Challenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/makeChallenge/joinChallenge/{challengeId}": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "formData",
+            "name": "challengeVideo",
+            "type": "file"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/Challenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/makeChallenge/unjoinChallenge/{challengeId}": {
+      "get": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/Challenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "apiResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "content": "application/json",
+      "required": ["email", "password"],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "UserProfile": {
+      "type": "object",
+      "content": "application/json",
+      "required": ["name", "username", "birthDate"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "birthDate": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "bio": {
+          "type": "string"
+        }
+      }
+    },
+    "Challenge": {
+      "type": "object",
+      "content": "application/json",
+      "required": [
+        "challengerId",
+        "name",
+        "prize",
+        "deadLineToVote",
+        "deadLineTimeToVote"
+      ],
+      "properties": {
+        "challengerId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "prize": {
+          "type": "string"
+        },
+        "deadLineToVote": {
+          "type": "string"
+        },
+        "deadLineTimeToVote": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
