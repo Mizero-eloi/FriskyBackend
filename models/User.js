@@ -46,15 +46,53 @@ const userSchema = new mongoose.Schema({
     minlength: 5,
     maxlength: 1000,
   },
-  profile: {
-    type: String
+  challengeRequests: {
+    type: [
+      new mongoose.Schema({
+        challenger: {
+          type: new mongoose.Schema({
+            name: {
+              type: String,
+              minlength: 5,
+              maxlength: 50,
+              required: true,
+            },
+            profile: {
+              type: String,
+            },
+            challengeVideo: {
+              type: String,
+            },
+          }),
+        },
+        challenge: {
+          type: String,
+          required: true,
+        },
+        prize: {
+          type: String,
+          required: true,
+        },
+        isAccepted: {
+          type: Boolean,
+          default: false,
+        },
+      }),
+    ],
   },
-
+  profile: {
+    type: String,
+  },
 });
 
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
-    { _id: this._id, email: this.email, username: this.username, profile: this.profile },
+    {
+      _id: this._id,
+      email: this.email,
+      username: this.username,
+      profile: this.profile,
+    },
     config.get("jwtPrivateKey")
   );
   return token;
@@ -73,17 +111,15 @@ const validateUserEntry = (user) => {
 
 const validateUserProfile = (profile) => {
   const schema = Joi.object().keys({
-    name : Joi.string().min(5).max(255).required(),
+    name: Joi.string().min(5).max(255).required(),
     username: Joi.string().min(5).max(50).required(),
     birthDate: Joi.date().required(),
     gender: Joi.string().min(4).max(50).required(),
-    bio: Joi.string()
+    bio: Joi.string(),
   });
 
   return schema.validate(profile);
 };
-
-
 
 module.exports.User = User;
 module.exports.validateUserEntry = validateUserEntry;

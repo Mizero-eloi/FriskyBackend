@@ -94,16 +94,18 @@ module.exports.challengeSomeone = async (req, res, next) => {
     const { error } = validateChallengeSomeone(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
+    const challenger = req.user;
+
     // Checking if the challenged person exists
-    let thechallenged = await User.findOne({
+    let theChallenged = await User.findOne({
       username: req.body.thechallenged,
     });
-    if (!thechallenged)
+    if (!theChallenged)
       return res.status(400).send("Oops ! user does not exists !");
 
     // Checking if the challenger is not the same as the challenged
 
-    if (thechallenged.username === req.user.username)
+    if (theChallenged.username === req.user.username)
       return res
         .status(403)
         .send("Permission denied. You can not challenge yourself");
@@ -113,26 +115,35 @@ module.exports.challengeSomeone = async (req, res, next) => {
     if (challenge)
       return res.status(400).send("The Challenge does already exists");
 
-    // Creating the challenge
+    // Checking if the challengeVideo is included
+    if (!req.file)
+      return res
+        .status(400)
+        .send("You should include a challenge video to challenge someone");
 
-    challenge = new Challenge({
-      challenger: {
-        _id: req.user._id,
-        name: req.user.username,
-        profile: req.user.profile,
+    // Requesting theChallenged user to be challenged
+    theChallenged = await User.findByIdAndUpdate(
+      theChallenged._id,
+      {
+        $push: {
+          challengeRequests: {
+            challenger: {
+              _id: challenger._id,
+              name: challenger.username,
+              profile: challenger.profile,
+              challengeVideo: req.file.path,
+            },
+            challenge: req.body.name,
+            prize: req.body.prize,
+          },
+        },
       },
-      thechallenged: {
-        _id: thechallenged._id,
-        name: thechallenged.username,
-        profile: thechallenged.profile,
-      },
-      name: req.body.name,
-      prize: req.body.prize,
-    });
+      { new: true }
+    );
 
-    // Saving the challenge
-    await challenge.save();
-    return res.status(200).send(challenge);
+    // Saving the open challenge and returning the response to the client
+
+    res.status(200).send(theChallenged.challengeRequests);
   } catch (ex) {
     res.status(500).send("Something went wrong !!");
     console.log(ex);

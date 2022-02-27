@@ -7,7 +7,7 @@ const challengeSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 50,
     unique: true,
-    required: true
+    required: true,
   },
   prize: {
     type: String,
@@ -19,96 +19,85 @@ const challengeSchema = new mongoose.Schema({
   deadLineToVote: {
     type: Date,
   },
-  deadLineTimeToVote:{
-     type: String,
-     match:/^([01]\d|2[0-3]):?([0-5]\d)$/,
-     
+  deadLineTimeToVote: {
+    type: String,
+    match: /^([01]\d|2[0-3]):?([0-5]\d)$/,
   },
-  coverPhoto:{
-     type:String
+  coverPhoto: {
+    type: String,
   },
   challenger: {
-      type: new mongoose.Schema({
-         name: {
-            type: String,
-            minlength: 5,
-            maxlength: 50,
-            required: true
-         },
-         profile: {
-            type: String,
-         },
-         challengeVideo: {
-            type: [String],
-         },
-         votes: {
-           type: [String]
-         },
-         
-
-      })
-
-  },
-   thechallenged: {
-   type: new mongoose.Schema({
+    type: new mongoose.Schema({
       name: {
-         type: String,
-         minlength: 5,
-         maxlength: 50,
-         required: true
+        type: String,
+        minlength: 5,
+        maxlength: 50,
+        required: true,
       },
       profile: {
-         type: String,
-      }
-      
-   })
-
-},
+        type: String,
+      },
+      challengeVideo: {
+        type: [String],
+      },
+      votes: {
+        type: [String],
+      },
+    }),
+  },
+  thechallenged: {
+    type: new mongoose.Schema({
+      name: {
+        type: String,
+        minlength: 5,
+        maxlength: 50,
+        required: true,
+      },
+      profile: {
+        type: String,
+      },
+    }),
+  },
   participants: {
-      type: [new mongoose.Schema({
-         name: {
-            type: String,
-            minlength: 5,
-            maxlength: 50,
-            required: true
-         },
-         profile: {
-            type: String,
-            minlength: 5,
-            maxlength: 50,
-         },
-         challengeVideo: {
-            type: [String],
-         },
-         votes: {
-           type: [String]
-         },
-
-      })]
-
+    type: [
+      new mongoose.Schema({
+        name: {
+          type: String,
+          minlength: 5,
+          maxlength: 50,
+          required: true,
+        },
+        profile: {
+          type: String,
+          minlength: 5,
+          maxlength: 50,
+        },
+        challengeVideo: {
+          type: [String],
+        },
+        votes: {
+          type: [String],
+        },
+      }),
+    ],
   },
   comments: {
-      type: [new mongoose.Schema({
+    type: [
+      new mongoose.Schema({
         commenter: {
-            type: String,
-            minlength: 5,
-            maxlength: 50,
-         },
-         message:{
-            type: String,
-            minlength: 1,
-            maxlength: 1000,
-
-         }
-      })]
-
+          type: String,
+          minlength: 5,
+          maxlength: 50,
+        },
+        message: {
+          type: String,
+          minlength: 1,
+          maxlength: 1000,
+        },
+      }),
+    ],
   },
-  
-
-
 });
-
-
 
 const Challenge = mongoose.model("challenge", challengeSchema);
 
@@ -118,25 +107,25 @@ const validateChallengePost = (challenge) => {
     name: Joi.string().min(2).max(255).required(),
     prize: Joi.string().min(5).max(255).required(),
     deadLineToVote: Joi.date().required(),
-    deadLineTimeToVote: Joi.string().regex(/^([01]\d|2[0-3]):?([0-5]\d)$/).required()
+    deadLineTimeToVote: Joi.string()
+      .regex(/^([01]\d|2[0-3]):?([0-5]\d)$/)
+      .required(),
   });
 
   return schema.validate(challenge);
 };
 
 const validateChallengeSomeone = (challenge) => {
-   const schema = Joi.object().keys({
-      name: Joi.string().min(2).max(255).required(),
-      thechallenged: Joi.string().min(5).max(50).required(),
-      prize: Joi.string().min(2).max(255).required(),
-   });
- 
-   return schema.validate(challenge);
- };
+  const schema = Joi.object().keys({
+    name: Joi.string().min(2).max(255).required(),
+    thechallenged: Joi.string().min(5).max(50).required(),
+    prize: Joi.string().min(2).max(255).required(),
+    challengeVideo: Joi.string(),
+  });
 
-
+  return schema.validate(challenge);
+};
 
 module.exports.Challenge = Challenge;
 module.exports.validateChallengePost = validateChallengePost;
 module.exports.validateChallengeSomeone = validateChallengeSomeone;
-
