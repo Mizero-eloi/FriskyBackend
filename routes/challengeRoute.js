@@ -1,62 +1,115 @@
 const express = require("express");
-const multer  =  require("multer");
-const { makeChallenge, postChallengeVideoWhileMakingChallenge, uploadChallengeCoverPhoto, joinChallenge, challengeSomeone, unJoinChallenge, commentInChallenge } = require("../controllers/challengeController");
 const auth = require("../middleware/auth");
+const multer = require("multer");
+const {
+  makeChallenge,
+  postChallengeVideoWhileMakingChallenge,
+  uploadChallengeCoverPhoto,
+  joinChallenge,
+  challengeSomeone,
+  unJoinChallenge,
+  acceptChallenge,
+  commentInChallenge
+} = require("../controllers/challengeController");
+
 const validateParameterId = require("../middleware/validateParameterId");
 
 // configuring multer and indicating the destination folder
 const storage = multer.diskStorage({
-    destination: function (req, file, cb){ 
-        cb(null, './uploads');
-    },
-    filename: function (req, file, cb){
-        cb(null,new Date().toISOString().replace(/:/g, "_") + file.originalname);
-    }
-})
+  destination: function (req, file, cb) {
+    cb(null, "./uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, new Date().toISOString().replace(/:/g, "_") + file.originalname);
+  },
+});
 
-const fileFilter = (req, file, cb) =>{
-    if(!file.originalname.match(/\.(mp4|MPEG-4|mkv|WebM|OGG)$/)){
-        return cb(null, false);
-    }
-    cb(null, true)
-    
-}
+const fileFilter = (req, file, cb) => {
+  if (!file.originalname.match(/\.(mp4|MPEG-4|mkv|WebM|OGG)$/)) {
+    return cb(null, false);
+  }
+  cb(null, true);
+};
 
-
-
-const upload = multer({storage, limits: {
-    fileSize: 1024 * 1024 * 20 // 20 MBs
-}, fileFilter});
-
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 1024 * 1024 * 20, // 20 MBs
+  },
+  fileFilter,
+});
 
 const Imagestorage = multer.diskStorage({
-    destination: function (req, file, cb){
-        cb(null, './ImageUploads');
-    },
-    filename: function (req, file, cb){
-        cb(null,new Date().toISOString().replace(/:/g, "_") + file.originalname);
-    }
-})
+  destination: function (req, file, cb) {
+    cb(null, "./ImageUploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, new Date().toISOString().replace(/:/g, "_") + file.originalname);
+  },
+});
 
-const ImageFilter = (req, file, cb) =>{
-        if(file.mimetype === "image/jpeg" || file.mimetype === "image/png" || file.mimetype === "image/jpg" ){
-           return cb(null, true);
-        } 
-        cb(null, false); 
-}
+const ImageFilter = (req, file, cb) => {
+  if (
+    file.mimetype === "image/jpeg" ||
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg"
+  ) {
+    return cb(null, true);
+  }
+  cb(null, false);
+};
 
-const imageUpload = multer({storage: Imagestorage, limits: {
-    fileSize: 1024 * 1024 * 5 // 5 MBs
-}, fileFilter:ImageFilter});
+const imageUpload = multer({
+  storage: Imagestorage,
+  limits: {
+    fileSize: 1024 * 1024 * 5, // 5 MBs
+  },
+  fileFilter: ImageFilter,
+});
 
 const router = express.Router();
 
-router.post("/challengeSomeone", challengeSomeone);
-router.post("/",makeChallenge);
-router.post("/:challengeId",validateParameterId("challengeId"), upload.single("challengeVideo"), postChallengeVideoWhileMakingChallenge);
-router.post("/uploadChallengeCoverphoto/:challengeId",validateParameterId("challengeId"),imageUpload.single("coverPhoto"),uploadChallengeCoverPhoto);
-router.post("/joinChallenge/:challengeId", auth, validateParameterId("challengeId"), upload.single("challengeVideo"),joinChallenge);
-router.get("/unjoinChallenge/:challengeId", auth,validateParameterId("challengeId"),unJoinChallenge );
+
 router.post("/commentInChallenge/:challengeId", auth,validateParameterId("challengeId"), commentInChallenge);
+router.post(
+  "/challengeSomeone",
+  upload.single("challengeVideo"),
+  challengeSomeone
+);
+router.post("/", makeChallenge);
+
+router.post(
+  "/:challengeId",
+  validateParameterId("challengeId"),
+  upload.single("challengeVideo"),
+  postChallengeVideoWhileMakingChallenge
+);
+
+router.post(
+  "/uploadChallengeCoverphoto/:challengeId",
+  validateParameterId("challengeId"),
+  imageUpload.single("coverPhoto"),
+  uploadChallengeCoverPhoto
+);
+
+router.post(
+  "/joinChallenge/:challengeId",
+  validateParameterId("challengeId"),
+  upload.single("challengeVideo"),
+  joinChallenge
+);
+
+router.get(
+  "/unjoinChallenge/:challengeId",
+  validateParameterId("challengeId"),
+  unJoinChallenge
+);
+
+router.get(
+  "/acceptChallenge/:challengeId",
+  validateParameterId("challengeId"),
+  acceptChallenge
+);
+
 
 module.exports = router;

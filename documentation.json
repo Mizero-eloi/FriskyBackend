@@ -383,7 +383,91 @@
       }
     },
     "/makeChallenge/commentInChallenge/{challengeId}": {
+       "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in":"body",
+            "name":"body",
+            "properties":{
+              "message":{
+                "type":"string",
+                "example":"like your challenges"
+              }
+            }
+          }
+           ]
+}
+                      
+  },
+    "/makeChallenge/challengeSomeone": {
+
       "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "formData",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "thechallenged",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "prize",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "challengeVideo",
+            "type": "file"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/ChallengeSomeone" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
+          },
+          "400": { "description": "Bad request" },
+          "403": { "description": "Permission denied" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/makeChallenge/acceptChallenge/{challengeId}": {
+      "get": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
         "produces": ["application/json"],
@@ -421,6 +505,13 @@
           "201": {
             "description": "success",
             "$ref": "#/definitions/commentInChallenge"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/Challenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
           },
           "400": { "description": "Bad request" },
           "500": { "description": "Server error" }
@@ -500,6 +591,7 @@
         }
       }
     },
+
     "commentInChallenge": {
       "type": "object",
       "content": "application/json",
@@ -512,6 +604,26 @@
           "type": "string"
         },
         "message": {
+          "type":"string"
+        }
+      }
+    },
+
+    "ChallengeSomeone": {
+      "type": "object",
+      "content": "application/json",
+      "required": ["name", "prize", "thechallenged", "challengeVideo"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "prize": {
+          "type": "string"
+        },
+        "thechallenged": {
+          "type": "string"
+        },
+        "challengeVideo": {
           "type": "string"
         }
       }
