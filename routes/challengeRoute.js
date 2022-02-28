@@ -7,6 +7,7 @@ const {
   joinChallenge,
   challengeSomeone,
   unJoinChallenge,
+  acceptChallenge,
 } = require("../controllers/challengeController");
 const validateParameterId = require("../middleware/validateParameterId");
 
@@ -71,28 +72,38 @@ router.post(
   challengeSomeone
 );
 router.post("/", makeChallenge);
+
 router.post(
   "/:challengeId",
   validateParameterId("challengeId"),
   upload.single("challengeVideo"),
   postChallengeVideoWhileMakingChallenge
 );
+
 router.post(
   "/uploadChallengeCoverphoto/:challengeId",
   validateParameterId("challengeId"),
   imageUpload.single("coverPhoto"),
   uploadChallengeCoverPhoto
 );
+
 router.post(
   "/joinChallenge/:challengeId",
   validateParameterId("challengeId"),
   upload.single("challengeVideo"),
   joinChallenge
 );
+
 router.get(
   "/unjoinChallenge/:challengeId",
   validateParameterId("challengeId"),
   unJoinChallenge
+);
+
+router.get(
+  "/acceptChallenge/:challengeId",
+  validateParameterId("challengeId"),
+  acceptChallenge
 );
 
 module.exports = router;

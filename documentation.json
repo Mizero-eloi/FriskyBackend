@@ -428,6 +428,40 @@
           "500": { "description": "Server error" }
         }
       }
+    },
+    "/makeChallenge/acceptChallenge/{challengeId}": {
+      "get": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/Challenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
     }
   },
   "definitions": {

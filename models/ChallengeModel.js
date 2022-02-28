@@ -6,7 +6,6 @@ const challengeSchema = new mongoose.Schema({
     type: String,
     minlength: 2,
     maxlength: 50,
-    unique: true,
     required: true,
   },
   prize: {
