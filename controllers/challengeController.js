@@ -2,6 +2,7 @@ const {
   validateChallengePost,
   Challenge,
   validateChallengeSomeone,
+  validateComments,
 } = require("../models/ChallengeModel");
 const { User } = require("../models/User");
 const _ = require("lodash");
@@ -218,3 +219,109 @@ module.exports.unJoinChallenge = async (req, res, next) => {
     console.log(ex);
   }
 };
+
+//comments in challenge
+module.exports.commentInChallenge = async (req, res, next) =>{
+  try {
+    //adding comment to the comment section of the challenge
+    const commenter = req.user.username;
+    const message = req.body.message;
+
+    // console.log("Message: "+ message)
+    // challenge.comments.push(commentGroup);
+
+    // validating the input message
+    const { error } = validateComments(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    const challenge = await Challenge.findByIdAndUpdate(req.params.challengeId, {
+      $push: {
+        comments:{
+          commenter,message
+        } 
+
+      }
+    }, {new: true});
+
+    // Verifying if the challenge exists in the database !
+
+    if(!challenge) return res.status(400).send("Challenge does not exist");
+
+    return res.status(200).send(challenge);
+  } catch (e) {
+    res.status(500).send("Something went wrong!");
+    console.log(e);
+  }
+}
+
+//adding votes to the participants votes
+module.exports.voteInChallenge = async (req, res, next) =>{
+  try {
+    //checking if the user is logged in
+    let user = req.user;
+
+    //checking if the challenge exists
+    const challenge = await Challenge.findById(req.params.challengeId);
+    if(!challenge) return res.status(404).send("Challenge does not exist");
+
+    //getting the voted participants and if exists
+    const votedParticipant = req.body.userId;
+    if(!votedParticipant) return res.status(400).send("Participant not found.");
+
+    //adding the vote to the participants votes
+    votedParticipant.votes.$push(user,{new: true});
+
+    return res.status(200).send(user);
+  } catch (e) {
+    res.status(500).send("Something went wrong!");
+    console.log(e);
+  }
+}
+
+//removing votes to the participants votes
+module.exports.unVoteInChallenge = async (req, res, next) =>{
+  try {
+    //checking if the user is logged in
+    let user = req.user._id;
+
+    //checking if the challenge exists
+    const challenge = await Challenge.findById(req.params.challengeId);
+    if(!challenge) return res.status(404).send("Challenge does not exist");
+
+    //getting the voted participants and if exists
+    const votedParticipant = req.body.userId;
+    if(!votedParticipant) return res.status(400).send("Participant not found.");
+
+    //adding the vote to the participants votes
+    votedParticipant.votes.$pull(user,{new: true});
+
+    return res.status(200).send(user);
+  } catch (e) {
+    res.status(500).send("Something went wrong!");
+    console.log(e);
+  }
+}
+
+//searching for user
+module.exports.searchUser = async (req,res, next) => {
+  //user input
+  const userPattern = new ReqExp("^"+ req.body.query);
+
+  //searching for the user 
+  User.find({username:{$regex:userPattern}})
+    .then(user => { return res.status(200).send(user) })  
+    .catch(err => { return res.status(404).send("User not found", err[0].message)})
+
+}
+
+//searching for challenge
+module.exports.searchUser = async (req,res, next) => {
+  //user input
+  const userPattern = new ReqExp("^"+ req.body.query);
+
+  //searching for the user 
+  Challenge.find({name:{$regex:userPattern}})
+    .then(challenge => { return res.status(200).send(challenge) })  
+    .catch(err => { return res.status(404).send("User not found", err[0].message)})
+
+}

@@ -1,6 +1,7 @@
 const express = require("express");
 const multer  =  require("multer");
-const { makeChallenge, postChallengeVideoWhileMakingChallenge, uploadChallengeCoverPhoto, joinChallenge, challengeSomeone, unJoinChallenge } = require("../controllers/challengeController");
+const { makeChallenge, postChallengeVideoWhileMakingChallenge, uploadChallengeCoverPhoto, joinChallenge, challengeSomeone, unJoinChallenge, commentInChallenge } = require("../controllers/challengeController");
+const auth = require("../middleware/auth");
 const validateParameterId = require("../middleware/validateParameterId");
 
 // configuring multer and indicating the destination folder
@@ -54,7 +55,8 @@ router.post("/challengeSomeone", challengeSomeone);
 router.post("/",makeChallenge);
 router.post("/:challengeId",validateParameterId("challengeId"), upload.single("challengeVideo"), postChallengeVideoWhileMakingChallenge);
 router.post("/uploadChallengeCoverphoto/:challengeId",validateParameterId("challengeId"),imageUpload.single("coverPhoto"),uploadChallengeCoverPhoto);
-router.post("/joinChallenge/:challengeId",validateParameterId("challengeId"), upload.single("challengeVideo"),joinChallenge);
-router.get("/unjoinChallenge/:challengeId", validateParameterId("challengeId"),unJoinChallenge )
+router.post("/joinChallenge/:challengeId", auth, validateParameterId("challengeId"), upload.single("challengeVideo"),joinChallenge);
+router.get("/unjoinChallenge/:challengeId", auth,validateParameterId("challengeId"),unJoinChallenge );
+router.post("/commentInChallenge/:challengeId", auth,validateParameterId("challengeId"), commentInChallenge);
 
 module.exports = router;
