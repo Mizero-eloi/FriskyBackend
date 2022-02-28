@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middleware/auth");
 const multer = require("multer");
 const {
   makeChallenge,
@@ -8,7 +9,9 @@ const {
   challengeSomeone,
   unJoinChallenge,
   acceptChallenge,
+  commentInChallenge
 } = require("../controllers/challengeController");
+
 const validateParameterId = require("../middleware/validateParameterId");
 
 // configuring multer and indicating the destination folder
@@ -66,6 +69,8 @@ const imageUpload = multer({
 
 const router = express.Router();
 
+
+router.post("/commentInChallenge/:challengeId", auth,validateParameterId("challengeId"), commentInChallenge);
 router.post(
   "/challengeSomeone",
   upload.single("challengeVideo"),
@@ -105,5 +110,6 @@ router.get(
   validateParameterId("challengeId"),
   acceptChallenge
 );
+
 
 module.exports = router;

@@ -115,16 +115,36 @@ const validateChallengePost = (challenge) => {
 };
 
 const validateChallengeSomeone = (challenge) => {
-  const schema = Joi.object().keys({
+   const schema = Joi.object().keys({
     name: Joi.string().min(2).max(255).required(),
     thechallenged: Joi.string().min(5).max(50).required(),
     prize: Joi.string().min(2).max(255).required(),
     challengeVideo: Joi.string(),
   });
+ 
+   return schema.validate(challenge);
+ };
 
-  return schema.validate(challenge);
-};
+const validateComments = (comment) =>{
+   const schema = Joi.object().keys({
+      message: Joi.string().min(1).max(1000)
+   })
 
+   return schema.validate(comment);
+} 
+
+
+const validateVotes = (vote) =>{
+   const schema = Joi.object().keys({
+      votedParticipant: Joi.string().min(5).max(50).required()
+   })
+
+   return schema.validate(vote);
+} 
+  
+
+module.exports.validateComments = validateComments;
+module.exports.validateVotes = validateVotes;
 module.exports.Challenge = Challenge;
 module.exports.validateChallengePost = validateChallengePost;
 module.exports.validateChallengeSomeone = validateChallengeSomeone;

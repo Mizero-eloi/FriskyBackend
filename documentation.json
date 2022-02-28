@@ -382,7 +382,44 @@
         }
       }
     },
+    "/makeChallenge/commentInChallenge/{challengeId}": {
+       "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in":"body",
+            "name":"body",
+            "properties":{
+              "message":{
+                "type":"string",
+                "example":"like your challenges"
+              }
+            }
+          }
+           ]
+}
+                      
+  },
     "/makeChallenge/challengeSomeone": {
+
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -450,6 +487,24 @@
               "type": "string"
             },
             "required": "true"
+          },
+          {
+            "in":"body",
+            "name":"body",
+            "properties":{
+              "message":{
+                "type":"string",
+                "example":"like your challenges"
+              }
+            }
+            
+          }
+        ],
+        "schema": { "$ref": "#/definitions/commentInChallenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/commentInChallenge"
           }
         ],
         "schema": { "$ref": "#/definitions/Challenge" },
@@ -536,6 +591,24 @@
         }
       }
     },
+
+    "commentInChallenge": {
+      "type": "object",
+      "content": "application/json",
+      "required": [
+        "commenter",
+        "message"
+      ],
+      "properties": {
+        "commenter": {
+          "type": "string"
+        },
+        "message": {
+          "type":"string"
+        }
+      }
+    },
+
     "ChallengeSomeone": {
       "type": "object",
       "content": "application/json",
