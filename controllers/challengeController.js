@@ -6,6 +6,8 @@ const {
 const { User } = require("../models/User");
 const _ = require("lodash");
 const updateCollection = require("../reusable/updateCollection");
+const { startSession } = require("mongoose");
+const { object } = require("joi");
 
 module.exports.makeChallenge = async (req, res, next) => {
   try {
@@ -17,13 +19,8 @@ module.exports.makeChallenge = async (req, res, next) => {
     const challenger = await User.findById(req.body.challengerId);
     if (!challenger) return res.status(400).send("User does not exist");
 
-    // Checking if the challenge does already exist
-    let challenge = await Challenge.findOne({ name: req.body.name });
-    if (challenge)
-      return res.status(400).send("The Challenge does already exists");
-
     // formulating the open challenge object
-    challenge = new Challenge({
+    const challenge = new Challenge({
       challenger: {
         _id: challenger._id,
         name: challenger.username,
@@ -109,11 +106,6 @@ module.exports.challengeSomeone = async (req, res, next) => {
       return res
         .status(403)
         .send("Permission denied. You can not challenge yourself");
-
-    // Checking if the challenge does already exist
-    let challenge = await Challenge.findOne({ name: req.body.name });
-    if (challenge)
-      return res.status(400).send("The Challenge does already exists");
 
     // Checking if the challengeVideo is included
     if (!req.file)
@@ -227,5 +219,75 @@ module.exports.unJoinChallenge = async (req, res, next) => {
   } catch (ex) {
     res.status(500).send("Something went wrong");
     console.log(ex);
+  }
+};
+
+module.exports.acceptChallenge = async (req, res, next) => {
+  // Creating a session for a transaction
+  const session = await startSession();
+
+  const transactionOptions = {
+    readPreference: "primary",
+    readConcern: { level: "local" },
+    writeConern: { w: "majority" },
+  };
+
+  try {
+    const transactionResults = await session.withTransaction(async () => {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.user._id, "challengeRequests._id": req.params.challengeId },
+        {
+          $set: {
+            "challengeRequests.$.isAccepted": true,
+          },
+        },
+        { session, new: true }
+      );
+
+      if (!updatedUser) {
+        session.abortTransaction();
+        return res
+          .status(400)
+          .send("Xorry, there was no request to this challenge!");
+      }
+
+      // fetching the actual challenge request in the user challenge requests
+      console.log(
+        "all of the challengeRequests: " + updatedUser.challengeRequests[0]
+      );
+
+      const challengeRequest = await updatedUser.challengeRequests.filter(
+        (r) => r._id == req.params.challengeId
+      );
+      if (!challengeRequest) {
+        session.abortTransaction();
+        return res.status(400).send("challenge request does not exist !");
+      }
+
+      const challenge = new Challenge({
+        challenger: {
+          _id: challengeRequest[0].challenger._id,
+          name: challengeRequest[0].challenger.name,
+          profile: challengeRequest[0].challenger.profile,
+        },
+        name: challengeRequest[0].challenge,
+        prize: challengeRequest[0].prize,
+      });
+
+      await challenge.save({ session });
+
+      res.status(200).send(challenge);
+    }, transactionOptions);
+
+    if (transactionResults) {
+      console.log("My transaction worked successfully");
+    } else {
+      console.log("The transaction was intentionally aborted !!");
+    }
+  } catch (ex) {
+    res.status(500).send("Something went wrong !");
+    console.log("The transaction was aborted due to some errors " + ex);
+  } finally {
+    await session.endSession();
   }
 };
