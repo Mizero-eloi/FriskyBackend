@@ -81,6 +81,14 @@ module.exports.postChallengeVideoWhileMakingChallenge = async (
       console.log("The updatedChallenge: " + challenge);
 
       // ================ Performing another task
+
+      // Checking if the user is not already in the competition
+      let competitor =
+        challenge.participants.length > 0 &&
+        challenge.participants.filter((p) => p._id == participant._id);
+      if (competitor)
+        return res.status(400).send("You are already a competitor");
+
       // Adding the creator to the participant array
 
       challenge = await Challenge.findByIdAndUpdate(
