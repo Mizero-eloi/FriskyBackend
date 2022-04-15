@@ -383,7 +383,7 @@
       }
     },
     "/makeChallenge/commentInChallenge/{challengeId}": {
-       "post": {
+      "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
         "produces": ["application/json"],
@@ -405,21 +405,19 @@
             "required": "true"
           },
           {
-            "in":"body",
-            "name":"body",
-            "properties":{
-              "message":{
-                "type":"string",
-                "example":"like your challenges"
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "message": {
+                "type": "string",
+                "example": "like your challenges"
               }
             }
           }
-           ]
-}
-                      
-  },
+        ]
+      }
+    },
     "/makeChallenge/challengeSomeone": {
-
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -489,22 +487,14 @@
             "required": "true"
           },
           {
-            "in":"body",
-            "name":"body",
-            "properties":{
-              "message":{
-                "type":"string",
-                "example":"like your challenges"
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "message": {
+                "type": "string",
+                "example": "like your challenges"
               }
             }
-            
-          }
-        ],
-        "schema": { "$ref": "#/definitions/commentInChallenge" },
-        "responses": {
-          "201": {
-            "description": "success",
-            "$ref": "#/definitions/commentInChallenge"
           }
         ],
         "schema": { "$ref": "#/definitions/Challenge" },
@@ -595,16 +585,13 @@
     "commentInChallenge": {
       "type": "object",
       "content": "application/json",
-      "required": [
-        "commenter",
-        "message"
-      ],
+      "required": ["commenter", "message"],
       "properties": {
         "commenter": {
           "type": "string"
         },
         "message": {
-          "type":"string"
+          "type": "string"
         }
       }
     },
