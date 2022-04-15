@@ -194,30 +194,29 @@
             "required": "true"
           },
           {
-            "in": "body",
-            "name": "body",
-            "properties": {
-              "challengerId": {
-                "type": "string",
-                "example": "6214e67de276afedcb7592dc"
-              },
-              "name": {
-                "type": "string",
-                "example": "downChallenge"
-              },
-              "prize": {
-                "type": "string",
-                "example": "20000 frw"
-              },
-              "deadLineToVote": {
-                "type": "string",
-                "example": "01/14/2022"
-              },
-              "deadLineTimeToVote": {
-                "type": "string",
-                "example": "00:45"
-              }
-            }
+            "in": "formData",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "prize",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "deadLineToVote",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "deadLineTimeToVote",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "challengeVideo",
+            "type": "file"
           }
         ],
         "schema": { "$ref": "#/definitions/Challenge" },
@@ -403,6 +402,35 @@
               "type": "string"
             },
             "required": "true"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "message": {
+                "type": "string",
+                "example": "like your challenges"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/makeChallenge/testChallenge": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "eloi"
+              }
+            }
           },
           {
             "in": "body",

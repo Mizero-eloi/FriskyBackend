@@ -102,9 +102,9 @@ const Challenge = mongoose.model("challenge", challengeSchema);
 
 const validateChallengePost = (challenge) => {
   const schema = Joi.object().keys({
-    challengerId: Joi.objectId().required(),
     name: Joi.string().min(2).max(255).required(),
     prize: Joi.string().min(5).max(255).required(),
+    challengeVideo: Joi.string(),
     deadLineToVote: Joi.date().required(),
     deadLineTimeToVote: Joi.string()
       .regex(/^([01]\d|2[0-3]):?([0-5]\d)$/)
@@ -115,33 +115,31 @@ const validateChallengePost = (challenge) => {
 };
 
 const validateChallengeSomeone = (challenge) => {
-   const schema = Joi.object().keys({
+  const schema = Joi.object().keys({
     name: Joi.string().min(2).max(255).required(),
     thechallenged: Joi.string().min(5).max(50).required(),
     prize: Joi.string().min(2).max(255).required(),
     challengeVideo: Joi.string(),
   });
- 
-   return schema.validate(challenge);
- };
 
-const validateComments = (comment) =>{
-   const schema = Joi.object().keys({
-      message: Joi.string().min(1).max(1000)
-   })
+  return schema.validate(challenge);
+};
 
-   return schema.validate(comment);
-} 
+const validateComments = (comment) => {
+  const schema = Joi.object().keys({
+    message: Joi.string().min(1).max(1000),
+  });
 
+  return schema.validate(comment);
+};
 
-const validateVotes = (vote) =>{
-   const schema = Joi.object().keys({
-      votedParticipant: Joi.string().min(5).max(50).required()
-   })
+const validateVotes = (vote) => {
+  const schema = Joi.object().keys({
+    votedParticipant: Joi.string().min(5).max(50).required(),
+  });
 
-   return schema.validate(vote);
-} 
-  
+  return schema.validate(vote);
+};
 
 module.exports.validateComments = validateComments;
 module.exports.validateVotes = validateVotes;
