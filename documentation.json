@@ -230,7 +230,7 @@
         }
       }
     },
-    "/makeChallenge/{challengeId}": {
+    "/makeChallenge/addVideotoChallenge/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["multipart/form-data"],

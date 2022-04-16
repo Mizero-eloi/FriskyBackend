@@ -18,7 +18,7 @@ module.exports.createChallenge = async (req, res, next) => {
   // Validate the challengeVideo
   if (!req.file) return res.status(400).send("challengeVideo is required !");
 
-  // Assigning the currently logged in user to challenger
+  // Assigning the currently logged in user to challenge
 
   const challenger = req.user;
 
@@ -277,17 +277,8 @@ module.exports.joinChallenge = async (req, res, next) => {
           participants: {
             name: participant.username,
             profile: participant.profile,
+            challengeVideo: req.file.path,
           },
-        },
-      },
-      { new: true }
-    );
-
-    challenge = await Challenge.findOneAndUpdate(
-      { _id: challenge._id, "participants.name": participant.username },
-      {
-        $push: {
-          "participants.$.challengeVideo": req.file.path,
         },
       },
       { new: true }
@@ -299,6 +290,89 @@ module.exports.joinChallenge = async (req, res, next) => {
     console.log(ex);
   }
 };
+
+module.exports.addVideoToChallenge = async (req, res, next) => {
+  try {
+    // checking if the given challenge exists
+    let challenge = await Challenge.findById(req.params.challengeId);
+    if (!challenge) return res.status(400).send("Challenge does not exist !");
+
+    // Assigning the currently logged in user to challenger
+
+    const participant = req.user;
+
+    challenge = await Challenge.findOneAndUpdate(
+      { _id: challenge._id, "participants.name": participant.username },
+      {
+        $push: {
+          "participants.$.challengeVideo": req.file.path,
+        },
+      },
+      { new: true }
+    );
+
+    // Returning the challenge to the client
+    res.status(200).send(challenge);
+  } catch (ex) {
+    res.status(500).send("Something went wrong");
+    console.log(ex);
+  }
+};
+
+// ======================================================================================
+
+// module.exports.joinChallenge = async (req, res, next) => {
+//   try {
+//     // Checking if the logged user is in our database
+//     const participant = req.user;
+
+//     // checking if the given challenge exists
+//     let challenge = await Challenge.findById(req.params.challengeId);
+//     if (!challenge) return res.status(400).send("Challenge does not exist !");
+
+//     // Checking if the user is the owner of the challenge
+//     if (challenge.challenger.name === participant.username)
+//       return res
+//         .status(400)
+//         .send("You automatically join the challenge after creating it!");
+
+//     // Checking if the user is not already in the competition
+//     let competitor =
+//       challenge.participants.length > 0 &&
+//       challenge.participants.filter((p) => p._id == participant._id);
+//     if (competitor) return res.status(400).send("You are already a competitor");
+
+//     challenge = await Challenge.findByIdAndUpdate(
+//       challenge._id,
+//       {
+//         $push: {
+//           participants: {
+//             name: participant.username,
+//             profile: participant.profile,
+//           },
+//         },
+//       },
+//       { new: true }
+//     );
+
+//     challenge = await Challenge.findOneAndUpdate(
+//       { _id: challenge._id, "participants.name": participant.username },
+//       {
+//         $push: {
+//           "participants.$.challengeVideo": req.file.path,
+//         },
+//       },
+//       { new: true }
+//     );
+
+//     res.status(200).send(challenge.participants);
+//   } catch (ex) {
+//     res.status(500).send("Something went wrong");
+//     console.log(ex);
+//   }
+// };
+
+// ======================================================================================
 
 module.exports.unJoinChallenge = async (req, res, next) => {
   try {
