@@ -194,30 +194,29 @@
             "required": "true"
           },
           {
-            "in": "body",
-            "name": "body",
-            "properties": {
-              "challengerId": {
-                "type": "string",
-                "example": "6214e67de276afedcb7592dc"
-              },
-              "name": {
-                "type": "string",
-                "example": "downChallenge"
-              },
-              "prize": {
-                "type": "string",
-                "example": "20000 frw"
-              },
-              "deadLineToVote": {
-                "type": "string",
-                "example": "01/14/2022"
-              },
-              "deadLineTimeToVote": {
-                "type": "string",
-                "example": "00:45"
-              }
-            }
+            "in": "formData",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "prize",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "deadLineToVote",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "deadLineTimeToVote",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "challengeVideo",
+            "type": "file"
           }
         ],
         "schema": { "$ref": "#/definitions/Challenge" },
@@ -231,7 +230,7 @@
         }
       }
     },
-    "/makeChallenge/{challengeId}": {
+    "/makeChallenge/addVideotoChallenge/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["multipart/form-data"],
@@ -383,7 +382,7 @@
       }
     },
     "/makeChallenge/commentInChallenge/{challengeId}": {
-       "post": {
+      "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
         "produces": ["application/json"],
@@ -405,21 +404,48 @@
             "required": "true"
           },
           {
-            "in":"body",
-            "name":"body",
-            "properties":{
-              "message":{
-                "type":"string",
-                "example":"like your challenges"
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "message": {
+                "type": "string",
+                "example": "like your challenges"
               }
             }
           }
-           ]
-}
-                      
-  },
+        ]
+      }
+    },
+    "/makeChallenge/testChallenge": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "eloi"
+              }
+            }
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "message": {
+                "type": "string",
+                "example": "like your challenges"
+              }
+            }
+          }
+        ]
+      }
+    },
     "/makeChallenge/challengeSomeone": {
-
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -489,22 +515,14 @@
             "required": "true"
           },
           {
-            "in":"body",
-            "name":"body",
-            "properties":{
-              "message":{
-                "type":"string",
-                "example":"like your challenges"
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "message": {
+                "type": "string",
+                "example": "like your challenges"
               }
             }
-            
-          }
-        ],
-        "schema": { "$ref": "#/definitions/commentInChallenge" },
-        "responses": {
-          "201": {
-            "description": "success",
-            "$ref": "#/definitions/commentInChallenge"
           }
         ],
         "schema": { "$ref": "#/definitions/Challenge" },
@@ -595,16 +613,13 @@
     "commentInChallenge": {
       "type": "object",
       "content": "application/json",
-      "required": [
-        "commenter",
-        "message"
-      ],
+      "required": ["commenter", "message"],
       "properties": {
         "commenter": {
           "type": "string"
         },
         "message": {
-          "type":"string"
+          "type": "string"
         }
       }
     },

@@ -2,14 +2,14 @@ const express = require("express");
 const auth = require("../middleware/auth");
 const multer = require("multer");
 const {
-  makeChallenge,
-  postChallengeVideoWhileMakingChallenge,
   uploadChallengeCoverPhoto,
   joinChallenge,
   challengeSomeone,
   unJoinChallenge,
   acceptChallenge,
-  commentInChallenge
+  commentInChallenge,
+  createChallenge,
+  addVideoToChallenge,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -69,20 +69,25 @@ const imageUpload = multer({
 
 const router = express.Router();
 
-
-router.post("/commentInChallenge/:challengeId", auth,validateParameterId("challengeId"), commentInChallenge);
+router.post(
+  "/commentInChallenge/:challengeId",
+  auth,
+  validateParameterId("challengeId"),
+  commentInChallenge
+);
 router.post(
   "/challengeSomeone",
   upload.single("challengeVideo"),
   challengeSomeone
 );
-router.post("/", makeChallenge);
+router.post("/", auth, upload.single("challengeVideo"), createChallenge);
 
 router.post(
-  "/:challengeId",
+  "/addVideotoChallenge/:challengeId",
+  auth,
   validateParameterId("challengeId"),
   upload.single("challengeVideo"),
-  postChallengeVideoWhileMakingChallenge
+  addVideoToChallenge
 );
 
 router.post(
@@ -110,6 +115,5 @@ router.get(
   validateParameterId("challengeId"),
   acceptChallenge
 );
-
 
 module.exports = router;
