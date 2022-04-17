@@ -7,11 +7,12 @@ const {
   challengeSomeone,
   unJoinChallenge,
   acceptChallenge,
-  commentInChallenge,
   createChallenge,
   addVideoToChallenge,
   vote,
   removeVote,
+  comment,
+  removeComment,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -72,10 +73,17 @@ const imageUpload = multer({
 const router = express.Router();
 
 router.post(
-  "/commentInChallenge/:challengeId",
+  "/comment/:challengeId",
   auth,
   validateParameterId("challengeId"),
-  commentInChallenge
+  comment
+);
+
+router.post(
+  "/removeComment/:challengeId",
+  auth,
+  validateParameterId("challengeId"),
+  removeComment
 );
 
 router.post(

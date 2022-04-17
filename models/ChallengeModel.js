@@ -150,6 +150,13 @@ const validateComments = (comment) => {
 
   return schema.validate(comment);
 };
+const validateremoveComment = (comment) => {
+  const schema = Joi.object().keys({
+    commentId: Joi.objectId().required(),
+  });
+
+  return schema.validate(comment);
+};
 
 const validateVote = (vote) => {
   const schema = Joi.object().keys({
@@ -160,6 +167,7 @@ const validateVote = (vote) => {
 };
 
 module.exports.validateComments = validateComments;
+module.exports.validateremoveComment = validateremoveComment;
 module.exports.validateVote = validateVote;
 module.exports.Challenge = Challenge;
 module.exports.validateChallengePost = validateChallengePost;

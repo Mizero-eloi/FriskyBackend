@@ -4,6 +4,7 @@ const {
   validateChallengeSomeone,
   validateComments,
   validateVote,
+  validateremoveComment,
 } = require("../models/ChallengeModel");
 const { User } = require("../models/User");
 const _ = require("lodash");
@@ -276,7 +277,7 @@ module.exports.unJoinChallenge = async (req, res, next) => {
   }
 };
 //comments in challenge
-module.exports.commentInChallenge = async (req, res, next) => {
+module.exports.comment = async (req, res, next) => {
   try {
     //adding comment to the comment section of the challenge
     const commenter = req.user.username;
@@ -304,6 +305,50 @@ module.exports.commentInChallenge = async (req, res, next) => {
 
     // Verifying if the challenge exists in the database !
 
+    if (!challenge) return res.status(400).send("Challenge does not exist");
+
+    return res.status(200).send(challenge);
+  } catch (e) {
+    res.status(500).send("Something went wrong!");
+    console.log(e);
+  }
+};
+module.exports.removeComment = async (req, res, next) => {
+  try {
+    //adding comment to the comment section of the challenge
+    const commenter = req.user.username;
+    const message = req.body.message;
+
+    // console.log("Message: "+ message)
+    // challenge.comments.push(commentGroup);
+
+    // validating the input message
+    const { error } = validateremoveComment(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    // Checking if the comment exists
+    let challenge = await Challenge.findById(req.params.challengeId);
+    if (!challenge) return res.status(400).send("Challenge does not exist!");
+
+    // Searching for a comment in the challenge
+    const comments =
+      challenge.comments.length > 0 &&
+      challenge.comments.filter((c) => c._id == req.body.commentId);
+    if (!comments[0]) return res.status(400).send("Comment not found !");
+
+    challenge = await Challenge.findOneAndUpdate(
+      { _id: req.params.challengeId, "comments._id": req.body.commentId },
+      {
+        $pull: {
+          comments: {
+            _id: req.body.commentId,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    // Verifying if the challenge exists in the database !
     if (!challenge) return res.status(400).send("Challenge does not exist");
 
     return res.status(200).send(challenge);
