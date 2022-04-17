@@ -347,6 +347,50 @@
         }
       }
     },
+    "/makeChallenge/vote/{challengeId}": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "participant": {
+                "type": "string",
+                "example": "afroKiller"
+              }
+            }
+          }
+        ],
+        "schema": { "$ref": "#/definitions/Challenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
     "/makeChallenge/unjoinChallenge/{challengeId}": {
       "get": {
         "tags": ["challenge"],

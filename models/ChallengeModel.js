@@ -40,7 +40,16 @@ const challengeSchema = new mongoose.Schema({
         type: [String],
       },
       votes: {
-        type: [String],
+        type: [
+          new mongoose.Schema({
+            name: {
+              type: String,
+              minlength: 5,
+              maxlength: 50,
+              required: true,
+            },
+          }),
+        ],
       },
     }),
   },
@@ -75,7 +84,16 @@ const challengeSchema = new mongoose.Schema({
           type: [String],
         },
         votes: {
-          type: [String],
+          type: [
+            new mongoose.Schema({
+              name: {
+                type: String,
+                minlength: 5,
+                maxlength: 50,
+                required: true,
+              },
+            }),
+          ],
         },
       }),
     ],
@@ -133,16 +151,16 @@ const validateComments = (comment) => {
   return schema.validate(comment);
 };
 
-const validateVotes = (vote) => {
+const validateVote = (vote) => {
   const schema = Joi.object().keys({
-    votedParticipant: Joi.string().min(5).max(50).required(),
+    participant: Joi.string().min(5).max(50).required(),
   });
 
   return schema.validate(vote);
 };
 
 module.exports.validateComments = validateComments;
-module.exports.validateVotes = validateVotes;
+module.exports.validateVote = validateVote;
 module.exports.Challenge = Challenge;
 module.exports.validateChallengePost = validateChallengePost;
 module.exports.validateChallengeSomeone = validateChallengeSomeone;

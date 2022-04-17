@@ -3,12 +3,12 @@ const {
   Challenge,
   validateChallengeSomeone,
   validateComments,
+  validateVote,
 } = require("../models/ChallengeModel");
 const { User } = require("../models/User");
 const _ = require("lodash");
 const updateCollection = require("../reusable/updateCollection");
 const { startSession } = require("mongoose");
-const { object } = require("joi");
 
 module.exports.createChallenge = async (req, res, next) => {
   // validating the user's input(for make challenge form )
@@ -275,6 +275,7 @@ module.exports.joinChallenge = async (req, res, next) => {
       {
         $push: {
           participants: {
+            _id: participant._id,
             name: participant.username,
             profile: participant.profile,
             challengeVideo: req.file.path,
@@ -447,24 +448,49 @@ module.exports.commentInChallenge = async (req, res, next) => {
 };
 
 //adding votes to the participants votes
-module.exports.voteInChallenge = async (req, res, next) => {
+module.exports.vote = async (req, res, next) => {
   try {
-    //checking if the user is logged in
-    let user = req.user;
+    // validating the user's input(for make challenge form )
+    const { error } = validateVote(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
-    //checking if the challenge exists
-    const challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(404).send("Challenge does not exist");
+    // checking if the given challenge exists
+    let challenge = await Challenge.findById(req.params.challengeId);
+    if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-    //getting the voted participants and if exists
-    const votedParticipant = req.body.userId;
-    if (!votedParticipant)
-      return res.status(400).send("Participant not found.");
+    // Checking if the user is not already in the competition
+    let participant =
+      challenge.participants.length > 0 &&
+      challenge.participants.filter((p) => p.name == req.body.participant);
+    if (!participant[0])
+      return res.status(400).send("Paricipant not found! (used filter)");
 
-    //adding the vote to the participants votes
-    votedParticipant.votes.$push(user, { new: true });
+    // Checking if the user hasn't voted the given participant already
+    const vote =
+      participant[0].votes.length > 0 &&
+      participant[0].votes.filter((v) => v.name == req.user.username);
 
-    return res.status(200).send(user);
+    console.log("All votes ", vote);
+
+    if (vote[0])
+      return res.status(400).send("You have already voted this participant");
+
+    // Pushing the vote into votes array
+    challenge = await Challenge.findOneAndUpdate(
+      { _id: challenge._id, "participants.name": req.body.participant },
+      {
+        $push: {
+          "participants.$.votes": {
+            _id: req.user._id,
+            name: req.user.username,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    // Returning the challenge to client
+    res.status(200).send(challenge);
   } catch (e) {
     res.status(500).send("Something went wrong!");
     console.log(e);
