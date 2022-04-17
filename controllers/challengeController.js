@@ -104,85 +104,6 @@ module.exports.createChallenge = async (req, res, next) => {
   }
 };
 
-// module.exports.postChallengeVideoWhileMakingChallenge = async (
-//   req,
-//   res,
-//   next
-// ) => {
-//   const participant = req.user;
-//   // Creating a session for a transaction
-//   const session = await startSession();
-
-//   const transactionOptions = {
-//     readPreference: "primary",
-//     readConcern: { level: "local" },
-//     writeConern: { w: "majority" },
-//   };
-
-//   try {
-//     const transactionResults = await session.withTransaction(async () => {
-//       let challenge = await Challenge.findByIdAndUpdate(
-//         req.params.challengeId,
-//         {
-//           $push: {
-//             "challenger.challengeVideo": req.file.path,
-//           },
-//         },
-//         { session, new: true }
-//       );
-
-//       // Stopping the transaction if the challenge as not found
-
-//       if (!challenge) {
-//         session.abortTransaction();
-//         return res.status(400).send("Oops! the challenge was not found!");
-//       }
-
-//       // fetching the  the challenge
-//       console.log("The updatedChallenge: " + challenge);
-
-//       // ================ Performing another task
-
-//       // Checking if the user is not already in the competition
-//       let competitor =
-//         challenge.participants.length > 0 &&
-//         challenge.participants.filter((p) => p._id == participant._id);
-//       if (competitor)
-//         return res.status(400).send("You are already a competitor");
-
-//       // Adding the creator to the participant array
-
-//       challenge = await Challenge.findByIdAndUpdate(
-//         challenge._id,
-//         {
-//           $push: {
-//             participants: {
-//               name: participant.username,
-//               profile: participant.profile,
-//             },
-//           },
-//         },
-//         { session, new: true }
-//       );
-
-//       res.status(200).send(challenge);
-//     }, transactionOptions);
-
-//     // Verifying if  the transaction worked as expected
-
-//     if (transactionResults) {
-//       console.log("My transaction worked successfully");
-//     } else {
-//       console.log("The transaction was intentionally aborted !!");
-//     }
-//   } catch (ex) {
-//     res.status(500).send("Something went wrong !");
-//     console.log("The transaction was aborted due to some errors " + ex);
-//   } finally {
-//     await session.endSession();
-//   }
-// };
-
 module.exports.uploadChallengeCoverPhoto = async (req, res, next) => {
   await updateCollection(
     Challenge,
@@ -320,61 +241,6 @@ module.exports.addVideoToChallenge = async (req, res, next) => {
   }
 };
 
-// ======================================================================================
-
-// module.exports.joinChallenge = async (req, res, next) => {
-//   try {
-//     // Checking if the logged user is in our database
-//     const participant = req.user;
-
-//     // checking if the given challenge exists
-//     let challenge = await Challenge.findById(req.params.challengeId);
-//     if (!challenge) return res.status(400).send("Challenge does not exist !");
-
-//     // Checking if the user is the owner of the challenge
-//     if (challenge.challenger.name === participant.username)
-//       return res
-//         .status(400)
-//         .send("You automatically join the challenge after creating it!");
-
-//     // Checking if the user is not already in the competition
-//     let competitor =
-//       challenge.participants.length > 0 &&
-//       challenge.participants.filter((p) => p._id == participant._id);
-//     if (competitor) return res.status(400).send("You are already a competitor");
-
-//     challenge = await Challenge.findByIdAndUpdate(
-//       challenge._id,
-//       {
-//         $push: {
-//           participants: {
-//             name: participant.username,
-//             profile: participant.profile,
-//           },
-//         },
-//       },
-//       { new: true }
-//     );
-
-//     challenge = await Challenge.findOneAndUpdate(
-//       { _id: challenge._id, "participants.name": participant.username },
-//       {
-//         $push: {
-//           "participants.$.challengeVideo": req.file.path,
-//         },
-//       },
-//       { new: true }
-//     );
-
-//     res.status(200).send(challenge.participants);
-//   } catch (ex) {
-//     res.status(500).send("Something went wrong");
-//     console.log(ex);
-//   }
-// };
-
-// ======================================================================================
-
 module.exports.unJoinChallenge = async (req, res, next) => {
   try {
     // Checking if the logged user is in our database
@@ -462,15 +328,12 @@ module.exports.vote = async (req, res, next) => {
     let participant =
       challenge.participants.length > 0 &&
       challenge.participants.filter((p) => p.name == req.body.participant);
-    if (!participant[0])
-      return res.status(400).send("Paricipant not found! (used filter)");
+    if (!participant[0]) return res.status(400).send("Paricipant not found!");
 
     // Checking if the user hasn't voted the given participant already
     const vote =
       participant[0].votes.length > 0 &&
       participant[0].votes.filter((v) => v.name == req.user.username);
-
-    console.log("All votes ", vote);
 
     if (vote[0])
       return res.status(400).send("You have already voted this participant");
@@ -498,24 +361,46 @@ module.exports.vote = async (req, res, next) => {
 };
 
 //removing votes to the participants votes
-module.exports.unVoteInChallenge = async (req, res, next) => {
+module.exports.removeVote = async (req, res, next) => {
   try {
-    //checking if the user is logged in
-    let user = req.user._id;
+    // validating the user's input(for make challenge form )
+    const { error } = validateVote(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
-    //checking if the challenge exists
-    const challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(404).send("Challenge does not exist");
+    // checking if the given challenge exists
+    let challenge = await Challenge.findById(req.params.challengeId);
+    if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-    //getting the voted participants and if exists
-    const votedParticipant = req.body.userId;
-    if (!votedParticipant)
-      return res.status(400).send("Participant not found.");
+    // Checking if the user is not already in the competition
+    let participant =
+      challenge.participants.length > 0 &&
+      challenge.participants.filter((p) => p.name == req.body.participant);
+    if (!participant[0]) return res.status(400).send("Paricipant not found!");
 
-    //adding the vote to the participants votes
-    votedParticipant.votes.$pull(user, { new: true });
+    // Checking if the user hasn't voted the given participant already
+    const vote =
+      participant[0].votes.length > 0 &&
+      participant[0].votes.filter((v) => v.name == req.user.username);
 
-    return res.status(200).send(user);
+    if (!vote[0])
+      return res.status(400).send("You did not vote this participant");
+
+    // Pushing the vote into votes array
+    challenge = await Challenge.findOneAndUpdate(
+      { _id: challenge._id, "participants.name": req.body.participant },
+      {
+        $pull: {
+          "participants.$.votes": {
+            _id: req.user._id,
+            name: req.user.username,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    // Returning the challenge to client
+    res.status(200).send(challenge);
   } catch (e) {
     res.status(500).send("Something went wrong!");
     console.log(e);

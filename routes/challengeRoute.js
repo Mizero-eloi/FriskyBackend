@@ -11,6 +11,7 @@ const {
   createChallenge,
   addVideoToChallenge,
   vote,
+  removeVote,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -82,6 +83,13 @@ router.post(
   auth,
   validateParameterId("challengeId"),
   vote
+);
+
+router.post(
+  "/removeVote/:challengeId",
+  auth,
+  validateParameterId("challengeId"),
+  removeVote
 );
 
 router.post(
