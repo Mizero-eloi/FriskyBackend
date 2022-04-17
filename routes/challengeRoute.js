@@ -10,6 +10,7 @@ const {
   commentInChallenge,
   createChallenge,
   addVideoToChallenge,
+  vote,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -75,6 +76,14 @@ router.post(
   validateParameterId("challengeId"),
   commentInChallenge
 );
+
+router.post(
+  "/vote/:challengeId",
+  auth,
+  validateParameterId("challengeId"),
+  vote
+);
+
 router.post(
   "/challengeSomeone",
   upload.single("challengeVideo"),
