@@ -2,7 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const config = require("config");
-const auth = require("./middleware/auth");
 const startupDebugger = require("debug")("app:startup");
 const dbDebugger = require("debug")("app:db");
 const swaggerJsDoc = require("swagger-jsdoc");
@@ -47,11 +46,9 @@ app.use(
   swaggerUi.setup(swaggerDoc, false, { docExpansion: "none" })
 );
 
-// Apis that requires authetication
-
-app.use(auth);
 app.use("/makeChallenge", require("./routes/challengeRoute"));
 app.use("/userProfile", require("./routes/userProfile"));
+app.use("/users", require("./routes/userRoute"));
 
 const port = process.env.PORT || config.get("serverPort");
 app.listen(port, () => {
