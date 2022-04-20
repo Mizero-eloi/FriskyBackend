@@ -47,6 +47,34 @@ module.exports.updateCollection = async (Collection, id, updates, res) => {
   }
 };
 
+// Update collection using $push modifier
+module.exports.updateCollectionPushToArray = async ({
+  Collection,
+  filters,
+  array,
+  updates,
+  res,
+}) => {
+  try {
+    // Validating if the given challenge exists & updating if ever it finds the challenge
+    const updatedObject = await Collection.findOneAndUpdate(
+      filters,
+      {
+        $push: {
+          [array]: updates,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedObject) return res.status(400).send("Document not found !");
+    res.status(200).send(updatedObject);
+  } catch (ex) {
+    res.status(500).send("Something went wrong");
+    console.log(ex);
+  }
+};
+
 // Delete One document
 module.exports.deleteDocument = async (Collection, id, res) => {
   try {

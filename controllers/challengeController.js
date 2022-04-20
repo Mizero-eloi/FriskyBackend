@@ -14,6 +14,7 @@ const {
   getAllDocuments,
   getOneDocument,
   deleteDocument,
+  updateCollectionPushToArray,
 } = require("../services/queries");
 const { startSession } = require("mongoose");
 
@@ -90,8 +91,6 @@ module.exports.createChallenge = async (req, res, next) => {
         },
         { session, new: true }
       );
-
-      res.status(200).send(challenge);
     }, transactionOptions);
 
     // Verifying if  the transaction worked as expected
@@ -171,29 +170,26 @@ module.exports.challengeSomeone = async (req, res, next) => {
         .status(400)
         .send("You should include a challenge video to challenge someone");
 
-    // Requesting theChallenged user to be challenged
-    theChallenged = await User.findByIdAndUpdate(
-      theChallenged._id,
-      {
-        $push: {
-          challengeRequests: {
-            challenger: {
-              _id: challenger._id,
-              name: challenger.username,
-              profile: challenger.profile,
-              challengeVideo: req.file.path,
-            },
-            challenge: req.body.name,
-            prize: req.body.prize,
-          },
-        },
+    updateCollectionPushToArray({
+      Collection: User,
+      filters: {
+        _id: theChallenged._id,
       },
-      { new: true }
-    );
+      array: "challengeRequests",
+      updates: {
+        challenger: {
+          _id: challenger._id,
+          name: challenger.username,
+          profile: challenger.profile,
+          challengeVideo: { name: req.file.path },
+        },
+        challenge: req.body.name,
+        prize: req.body.prize,
+      },
+      res,
+    });
 
     // Saving the open challenge and returning the response to the client
-
-    res.status(200).send(theChallenged.challengeRequests);
   } catch (ex) {
     res.status(500).send("Something went wrong !!");
     console.log(ex);
@@ -204,6 +200,7 @@ module.exports.joinChallenge = async (req, res, next) => {
   try {
     // Checking if the logged user is in our database
     const participant = req.user;
+    console.log(participant);
 
     // checking if the given challenge exists
     let challenge = await Challenge.findById(req.params.challengeId);
@@ -219,24 +216,34 @@ module.exports.joinChallenge = async (req, res, next) => {
     let competitor =
       challenge.participants.length > 0 &&
       challenge.participants.filter((p) => p._id == participant._id);
-    if (competitor) return res.status(400).send("You are already a competitor");
+    if (competitor[0])
+      return res.status(400).send("You are already a competitor");
 
-    challenge = await Challenge.findByIdAndUpdate(
-      challenge._id,
-      {
-        $push: {
-          participants: {
-            _id: participant._id,
-            name: participant.username,
-            profile: participant.profile,
-            challengeVideo: { name: req.file.path },
-          },
-        },
+    // challenge = await Challenge.findByIdAndUpdate(
+    //   challenge._id,
+    //   {
+    //     $push: {
+    //       participants: {
+    //         _id: participant._id,
+    //         name: participant.username,
+    //         profile: participant.profile,
+    //         challengeVideo: { name: req.file.path },
+    //       },
+    //     },
+    //   },
+    //   { new: true }
+    updateCollectionPushToArray({
+      Collection: Challenge,
+      filters: { _id: challenge._id },
+      array: "participants",
+      updates: {
+        _id: participant._id,
+        name: participant.username,
+        profile: participant.profile,
+        challengeVideo: { name: req.file.path },
       },
-      { new: true }
-    );
-
-    res.status(200).send(challenge.participants);
+      res,
+    });
   } catch (ex) {
     res.status(500).send("Something went wrong");
     console.log(ex);
@@ -254,19 +261,33 @@ module.exports.addVideoToChallenge = async (req, res, next) => {
       challenge.participants.length > 0 &&
       challenge.participants.filter((p) => p.name == req.user.username);
     if (!participant[0]) return res.status(400).send("Paricipant not found!");
+    console.log("The participant: " + participant[0]);
 
-    challenge = await Challenge.findOneAndUpdate(
-      { _id: challenge._id, "participants.name": participant[0].username },
-      {
-        $push: {
-          "participants.$.challengeVideo": { name: req.file.path },
-        },
+    // challenge = await Challenge.findOneAndUpdate(
+    //   { _id: challenge._id, "participants.name": participant[0].name },
+    //   {
+    //     $push: {
+    //       "participants.$.challengeVideo": { name: req.file.path },
+    //     },
+    //   },
+    //   { new: true }
+    // );
+
+    updateCollectionPushToArray({
+      Collection: Challenge,
+      filters: {
+        _id: req.params.challengeId,
+        "participants.name": participant[0].name,
       },
-      { new: true }
-    );
+      array: "participants.$.challengeVideo",
+      updates: {
+        name: req.file.path,
+      },
+      res,
+    });
 
     // Returning the challenge to the client
-    res.status(200).send(challenge);
+    // res.status(200).send(challenge);
   } catch (ex) {
     res.status(500).send("Something went wrong");
     console.log(ex);
@@ -363,24 +384,31 @@ module.exports.comment = async (req, res, next) => {
     const { error } = validateComments(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const challenge = await Challenge.findByIdAndUpdate(
-      req.params.challengeId,
-      {
-        $push: {
-          comments: {
-            commenter,
-            message,
-          },
-        },
+    // const challenge = await Challenge.findByIdAndUpdate(
+    //   req.params.challengeId,
+    //   {
+    //     $push: {
+    //       comments: {
+    //         commenter,
+    //         message,
+    //       },
+    //     },
+    //   },
+    //   { new: true }
+    // );
+
+    updateCollectionPushToArray({
+      Collection: Challenge,
+      filters: { _id: req.params.challengeId },
+      array: "comments",
+      updates: {
+        commenter: commenter,
+        message: message,
       },
-      { new: true }
-    );
+      res,
+    });
 
     // Verifying if the challenge exists in the database !
-
-    if (!challenge) return res.status(400).send("Challenge does not exist");
-
-    return res.status(200).send(challenge);
   } catch (e) {
     res.status(500).send("Something went wrong!");
     console.log(e);
@@ -469,22 +497,19 @@ module.exports.vote = async (req, res, next) => {
     if (vote[0])
       return res.status(400).send("You have already voted this participant");
 
-    // Pushing the vote into votes array
-    challenge = await Challenge.findOneAndUpdate(
-      { _id: challenge._id, "participants.name": req.body.participant },
-      {
-        $push: {
-          "participants.$.votes": {
-            _id: req.user._id,
-            name: req.user.username,
-          },
-        },
+    updateCollectionPushToArray({
+      Collection: Challenge,
+      filters: {
+        _id: challenge._id,
+        "participants.name": req.body.participant,
       },
-      { new: true }
-    );
-
-    // Returning the challenge to client
-    res.status(200).send(challenge);
+      array: "participants.$.votes",
+      updates: {
+        _id: req.user._id,
+        name: req.user.username,
+      },
+      res,
+    });
   } catch (e) {
     res.status(500).send("Something went wrong!");
     console.log(e);
