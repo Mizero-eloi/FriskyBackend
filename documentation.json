@@ -426,7 +426,130 @@
           "500": { "description": "Server error" }
         }
       }
+    },
+    "/makeChallenge/voteInChallenge/{challengeId}": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in":"body",
+            "name":"body",
+            "properties":{
+              "votedParticipant":{
+                "type":"string",
+                "example":"BadBoy"
+              }
+            }
+            
+          }
+        ],
+        "schema": { "$ref": "#/definitions/voteInChallenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/voteInChallenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/makeChallenge/unVoteInChallenge/{challengeId}": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in":"body",
+            "name":"body",
+            "properties":{
+              "votedParticipant":{
+                "type":"string",
+                "example":"BadBoy"
+              }
+            }
+            
+          }
+        ],
+        "schema": { "$ref": "#/definitions/unVoteInChallenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/unVoteInChallenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/makeChallenge/searchUser": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in":"formData",
+            "name":"UserToSearch",
+            "type":"string",
+            "example":"BadBoy"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/searchUser" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/searchUser"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
     }
+    
   },
   "definitions": {
     "apiResponse": {
@@ -512,6 +635,42 @@
           "type": "string"
         },
         "message": {
+          "type": "string"
+        }
+      }
+    },
+    "voteInChallenge": {
+      "type": "object",
+      "content": "application/json",
+      "required": [
+        "votedParticipant"
+      ],
+      "properties": {
+        "votedParticipant": {
+          "type": "string"
+        }
+      }
+    },
+    "unVoteInChallenge": {
+      "type": "object",
+      "content": "application/json",
+      "required": [
+        "votedParticipant"
+      ],
+      "properties": {
+        "votedParticipant": {
+          "type": "string"
+        }
+      }
+    },
+    "searchUser": {
+      "type": "object",
+      "content": "application/json",
+      "required": [
+        "UserToSearch"
+      ],
+      "properties": {
+        "UserToSearch": {
           "type": "string"
         }
       }
