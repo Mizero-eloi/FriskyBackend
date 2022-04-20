@@ -110,7 +110,7 @@ module.exports.createChallenge = async (req, res, next) => {
 
 // Get all challenges
 module.exports.getAllChallenges = async (req, res) => {
-  await getAllDocuments(Challenge, res);
+  await getAllDocuments({ Collection: Challenge, res });
 };
 
 // Get one document
@@ -126,7 +126,7 @@ module.exports.getAllChallenges = async (req, res) => {
 // };
 
 module.exports.getOneChallenge = async (req, res) => {
-  getOneDocument(Challenge, req.params.challengeId, res);
+  getOneDocument(Challenge, { _id: req.params.challengeId }, res);
 };
 
 module.exports.uploadChallengeCoverPhoto = async (req, res, next) => {
@@ -428,12 +428,12 @@ module.exports.getAllComments = async (req, res, next) => {
     if (!challenge) return res.status(400).send("Challenge does not exist!");
 
     // Getting all comments
-    const comments = await Challenge.find(
-      { _id: challenge._id },
-      { comments: 1 }
-    );
-
-    res.status(200).send(comments);
+    getAllDocuments({
+      Collection: Challenge,
+      filter: { _id: challenge._id },
+      fields: { comments: 1 },
+      res,
+    });
   } catch (ex) {
     res.status(500).send("something went wrong!");
     console.log(ex);
