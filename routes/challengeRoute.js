@@ -7,10 +7,16 @@ const {
   challengeSomeone,
   unJoinChallenge,
   acceptChallenge,
-  commentInChallenge,
   createChallenge,
   addVideoToChallenge,
   vote,
+  removeVote,
+  comment,
+  removeComment,
+  getAllComments,
+  removeVideoFromChallenge,
+  getAllChallenges,
+  getOneChallenge,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -71,10 +77,17 @@ const imageUpload = multer({
 const router = express.Router();
 
 router.post(
-  "/commentInChallenge/:challengeId",
+  "/comment/:challengeId",
   auth,
   validateParameterId("challengeId"),
-  commentInChallenge
+  comment
+);
+
+router.post(
+  "/removeComment/:challengeId",
+  auth,
+  validateParameterId("challengeId"),
+  removeComment
 );
 
 router.post(
@@ -85,11 +98,27 @@ router.post(
 );
 
 router.post(
+  "/removeVote/:challengeId",
+  auth,
+  validateParameterId("challengeId"),
+  removeVote
+);
+
+router.post(
   "/challengeSomeone",
+  auth,
   upload.single("challengeVideo"),
   challengeSomeone
 );
 router.post("/", auth, upload.single("challengeVideo"), createChallenge);
+// Route to get all challenges
+router.get("/", getAllChallenges);
+// Route to get one challenge
+router.get(
+  "/:challengeId",
+  validateParameterId("challengeId"),
+  getOneChallenge
+);
 
 router.post(
   "/addVideotoChallenge/:challengeId",
@@ -100,7 +129,15 @@ router.post(
 );
 
 router.post(
+  "/removeVideoFromChallenge/:challengeId",
+  auth,
+  validateParameterId("challengeId"),
+  removeVideoFromChallenge
+);
+
+router.post(
   "/uploadChallengeCoverphoto/:challengeId",
+  auth,
   validateParameterId("challengeId"),
   imageUpload.single("coverPhoto"),
   uploadChallengeCoverPhoto
@@ -108,6 +145,7 @@ router.post(
 
 router.post(
   "/joinChallenge/:challengeId",
+  auth,
   validateParameterId("challengeId"),
   upload.single("challengeVideo"),
   joinChallenge
@@ -115,14 +153,22 @@ router.post(
 
 router.get(
   "/unjoinChallenge/:challengeId",
+  auth,
   validateParameterId("challengeId"),
   unJoinChallenge
 );
 
 router.get(
   "/acceptChallenge/:challengeId",
+  auth,
   validateParameterId("challengeId"),
   acceptChallenge
+);
+
+router.get(
+  "/getAllComments/:challengeId",
+  validateParameterId("challengeId"),
+  getAllComments
 );
 
 module.exports = router;
