@@ -17,6 +17,7 @@ const {
   removeVideoFromChallenge,
   getAllChallenges,
   getOneChallenge,
+  deleteChallenge,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -118,6 +119,12 @@ router.get(
   "/:challengeId",
   validateParameterId("challengeId"),
   getOneChallenge
+);
+// Route to delete challenge
+router.delete(
+  "/:challengeId",
+  validateParameterId("challengeId"),
+  deleteChallenge
 );
 
 router.post(
