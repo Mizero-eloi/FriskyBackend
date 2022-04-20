@@ -13,6 +13,7 @@ const {
   updateCollection,
   getAllDocuments,
   getOneDocument,
+  deleteDocument,
 } = require("../services/queries");
 const { startSession } = require("mongoose");
 
@@ -114,19 +115,23 @@ module.exports.getAllChallenges = async (req, res) => {
 };
 
 // Get one document
-// module.exports.getOneChallenge = async (req, res) => {
-//   try {
-//     const challenge = await Challenge.findOne({ _id: req.params.challengeId });
-//     if (!challenge) res.status(400).send("Challenge does not exist !");
-//     res.status(200).send(challenge);
-//   } catch (ex) {
-//     res.send("Something went wrong exist!");
-//     console.log(ex);
-//   }
-// };
 
 module.exports.getOneChallenge = async (req, res) => {
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
+
   getOneDocument(Challenge, { _id: req.params.challengeId }, res);
+};
+
+// Delete one document
+
+module.exports.deleteChallenge = async (req, res) => {
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
+
+  deleteDocument(Challenge, req.params.challengeId, res);
 };
 
 module.exports.uploadChallengeCoverPhoto = async (req, res, next) => {
