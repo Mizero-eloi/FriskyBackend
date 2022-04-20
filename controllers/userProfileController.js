@@ -1,5 +1,5 @@
 const { User, validateUserProfile } = require("../models/User");
-const updateCollection = require("../reusable/updateCollection");
+const { updateCollection } = require("../services/queries");
 
 module.exports.userProfile = async (req, res, next) => {
   // validate the user's given data and return if it is not valid

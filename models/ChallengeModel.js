@@ -36,12 +36,6 @@ const challengeSchema = new mongoose.Schema({
       profile: {
         type: String,
       },
-      challengeVideo: {
-        type: [String],
-      },
-      votes: {
-        type: [String],
-      },
     }),
   },
   thechallenged: {
@@ -72,10 +66,25 @@ const challengeSchema = new mongoose.Schema({
           maxlength: 50,
         },
         challengeVideo: {
-          type: [String],
+          type: [
+            new mongoose.Schema({
+              name: {
+                type: String,
+              },
+            }),
+          ],
         },
         votes: {
-          type: [String],
+          type: [
+            new mongoose.Schema({
+              name: {
+                type: String,
+                minlength: 5,
+                maxlength: 50,
+                required: true,
+              },
+            }),
+          ],
         },
       }),
     ],
@@ -102,9 +111,9 @@ const Challenge = mongoose.model("challenge", challengeSchema);
 
 const validateChallengePost = (challenge) => {
   const schema = Joi.object().keys({
-    challengerId: Joi.objectId().required(),
     name: Joi.string().min(2).max(255).required(),
     prize: Joi.string().min(5).max(255).required(),
+    challengeVideo: Joi.string(),
     deadLineToVote: Joi.date().required(),
     deadLineTimeToVote: Joi.string()
       .regex(/^([01]\d|2[0-3]):?([0-5]\d)$/)
@@ -115,36 +124,51 @@ const validateChallengePost = (challenge) => {
 };
 
 const validateChallengeSomeone = (challenge) => {
-   const schema = Joi.object().keys({
+  const schema = Joi.object().keys({
     name: Joi.string().min(2).max(255).required(),
     thechallenged: Joi.string().min(5).max(50).required(),
     prize: Joi.string().min(2).max(255).required(),
     challengeVideo: Joi.string(),
   });
- 
-   return schema.validate(challenge);
- };
 
-const validateComments = (comment) =>{
-   const schema = Joi.object().keys({
-      message: Joi.string().min(1).max(1000)
-   })
+  return schema.validate(challenge);
+};
 
-   return schema.validate(comment);
-} 
+const validateComments = (comment) => {
+  const schema = Joi.object().keys({
+    message: Joi.string().min(1).max(1000),
+  });
 
+  return schema.validate(comment);
+};
+const validateremoveComment = (comment) => {
+  const schema = Joi.object().keys({
+    commentId: Joi.objectId().required(),
+  });
 
-const validateVotes = (vote) =>{
-   const schema = Joi.object().keys({
-      votedParticipant: Joi.string().min(5).max(50).required()
-   })
+  return schema.validate(comment);
+};
 
-   return schema.validate(vote);
-} 
-  
+const validateremoveVideo = (comment) => {
+  const schema = Joi.object().keys({
+    videoId: Joi.objectId().required(),
+  });
+
+  return schema.validate(comment);
+};
+
+const validateVote = (vote) => {
+  const schema = Joi.object().keys({
+    participant: Joi.string().min(5).max(50).required(),
+  });
+
+  return schema.validate(vote);
+};
 
 module.exports.validateComments = validateComments;
-module.exports.validateVotes = validateVotes;
+module.exports.validateremoveComment = validateremoveComment;
+module.exports.validateremoveVideo = validateremoveVideo;
+module.exports.validateVote = validateVote;
 module.exports.Challenge = Challenge;
 module.exports.validateChallengePost = validateChallengePost;
 module.exports.validateChallengeSomeone = validateChallengeSomeone;
