@@ -135,6 +135,16 @@ module.exports.deleteChallenge = async (req, res) => {
 };
 
 module.exports.uploadChallengeCoverPhoto = async (req, res, next) => {
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
+
+  // Checking if the person to change the coverPhoto is the owner of the challenge
+  if (challenge.challenger.name !== req.user.username)
+    return res
+      .status(403)
+      .send("Access denied! You can not change this coverPhoto");
+
   await updateCollection(
     Challenge,
     req.params.challengeId,
@@ -220,19 +230,6 @@ module.exports.joinChallenge = async (req, res, next) => {
     if (competitor[0])
       return res.status(400).send("You are already a competitor");
 
-    // challenge = await Challenge.findByIdAndUpdate(
-    //   challenge._id,
-    //   {
-    //     $push: {
-    //       participants: {
-    //         _id: participant._id,
-    //         name: participant.username,
-    //         profile: participant.profile,
-    //         challengeVideo: { name: req.file.path },
-    //       },
-    //     },
-    //   },
-    //   { new: true }
     updateCollectionPushToArray({
       Collection: Challenge,
       filters: { _id: challenge._id },
@@ -264,16 +261,6 @@ module.exports.addVideoToChallenge = async (req, res, next) => {
     if (!participant[0]) return res.status(400).send("Paricipant not found!");
     console.log("The participant: " + participant[0]);
 
-    // challenge = await Challenge.findOneAndUpdate(
-    //   { _id: challenge._id, "participants.name": participant[0].name },
-    //   {
-    //     $push: {
-    //       "participants.$.challengeVideo": { name: req.file.path },
-    //     },
-    //   },
-    //   { new: true }
-    // );
-
     updateCollectionPushToArray({
       Collection: Challenge,
       filters: {
@@ -286,9 +273,6 @@ module.exports.addVideoToChallenge = async (req, res, next) => {
       },
       res,
     });
-
-    // Returning the challenge to the client
-    // res.status(200).send(challenge);
   } catch (ex) {
     res.status(500).send("Something went wrong");
     console.log(ex);
@@ -318,16 +302,6 @@ module.exports.removeVideoFromChallenge = async (req, res, next) => {
       participant[0].challengeVideo.filter((v) => v._id == req.body.videoId);
 
     if (!video[0]) return res.status(400).send("Video not found!");
-
-    // challenge = await Challenge.findOneAndUpdate(
-    //   { _id: challenge._id, "participants.name": participant.username },
-    //   {
-    //     $pull: {
-    //       "participants.$.challengeVideo": { _id: req.body.videoId },
-    //     },
-    //   },
-    //   { new: true }
-    // );
 
     updateCollectionPullFromArray({
       Collection: Challenge,
@@ -363,18 +337,6 @@ module.exports.unJoinChallenge = async (req, res, next) => {
     if (!competitor)
       return res.status(400).send("You are not  in a  competition");
 
-    // challenge = await Challenge.findByIdAndUpdate(
-    //   challenge._id,
-    //   {
-    //     $pull: {
-    //       participants: {
-    //         name: participant.username,
-    //       },
-    //     },
-    //   },
-    //   { new: true }
-    // );
-
     updateCollectionPullFromArray({
       Collection: Challenge,
       filters: {
@@ -404,19 +366,6 @@ module.exports.comment = async (req, res, next) => {
     // validating the input message
     const { error } = validateComments(req.body);
     if (error) return res.status(400).send(error.details[0].message);
-
-    // const challenge = await Challenge.findByIdAndUpdate(
-    //   req.params.challengeId,
-    //   {
-    //     $push: {
-    //       comments: {
-    //         commenter,
-    //         message,
-    //       },
-    //     },
-    //   },
-    //   { new: true }
-    // );
 
     updateCollectionPushToArray({
       Collection: Challenge,
@@ -455,18 +404,6 @@ module.exports.removeComment = async (req, res, next) => {
       return res
         .status(403)
         .send("Access denied! You can not delete this comment!");
-
-    // challenge = await Challenge.findOneAndUpdate(
-    //   { _id: req.params.challengeId, "comments._id": req.body.commentId },
-    //   {
-    //     $pull: {
-    //       comments: {
-    //         _id: req.body.commentId,
-    //       },
-    //     },
-    //   },
-    //   { new: true }
-    // );
 
     updateCollectionPullFromArray({
       Collection: Challenge,
@@ -574,20 +511,6 @@ module.exports.removeVote = async (req, res, next) => {
 
     if (!vote[0])
       return res.status(400).send("You did not vote this participant");
-
-    // Pushing the vote into votes array
-    // challenge = await Challenge.findOneAndUpdate(
-    //   { _id: challenge._id, "participants.name": req.body.participant },
-    //   {
-    //     $pull: {
-    //       "participants.$.votes": {
-    //         _id: req.user._id,
-    //         name: req.user.username,
-    //       },
-    //     },
-    //   },
-    //   { new: true }
-    // );
 
     updateCollectionPullFromArray({
       Collection: Challenge,
