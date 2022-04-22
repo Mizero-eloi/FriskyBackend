@@ -8,6 +8,9 @@ const dbDebugger = require("debug")("app:db");
 const unCaughtExceptionDebugger = require("debug")(
   "app:unCaughtExceptionDebugger"
 );
+const unHandledRejectionDebugger = require("debug")(
+  "app:unHandledRejectionDebugger"
+);
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const winston = require("winston");
@@ -16,13 +19,6 @@ const swaggerDoc = require("./documentation.json");
 const error = require("./middleware/error");
 const { logger } = require("./middleware/logger");
 const app = express();
-
-process.on("uncaughtException", (ex) => {
-  unCaughtExceptionDebugger("WE GOT AN UNCAUGHT EXCEPTION!");
-  logger.error(ex.message, ex);
-});
-
-throw new Error("Something faiiled during startUp!");
 
 const swaggerOptions = {
   swaggerDefinition: {

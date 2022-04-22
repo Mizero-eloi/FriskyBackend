@@ -24,4 +24,22 @@ module.exports.logger = winston.createLogger({
     ,
     new winston.transports.File({ filename: "logfile.log" }),
   ],
+  rejectionHandlers: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        alignColorsAndTime
+      ),
+    }),
+    new winston.transports.File({ filename: "UnhandledRejections.log" }),
+  ],
+  exceptionHandlers: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        alignColorsAndTime
+      ),
+    }),
+    new winston.transports.File({ filename: "UnCaughtExceptions.log" }),
+  ],
 });
