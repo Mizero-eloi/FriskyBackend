@@ -154,383 +154,327 @@ module.exports.uploadChallengeCoverPhoto = async (req, res, next) => {
 };
 
 module.exports.challengeSomeone = async (req, res, next) => {
-  try {
-    // validating the challenge inputs
-    const { error } = validateChallengeSomeone(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+  // validating the challenge inputs
+  const { error } = validateChallengeSomeone(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-    const challenger = req.user;
+  const challenger = req.user;
 
-    // Checking if the challenged person exists
-    let theChallenged = await User.findOne({
-      username: req.body.thechallenged,
-    });
-    if (!theChallenged)
-      return res.status(400).send("Oops ! user does not exists !");
+  // Checking if the challenged person exists
+  let theChallenged = await User.findOne({
+    username: req.body.thechallenged,
+  });
+  if (!theChallenged)
+    return res.status(400).send("Oops ! user does not exists !");
 
-    // Checking if the challenger is not the same as the challenged
+  // Checking if the challenger is not the same as the challenged
 
-    if (theChallenged.username === req.user.username)
-      return res
-        .status(403)
-        .send("Permission denied. You can not challenge yourself");
+  if (theChallenged.username === req.user.username)
+    return res
+      .status(403)
+      .send("Permission denied. You can not challenge yourself");
 
-    // Checking if the challengeVideo is included
-    if (!req.file)
-      return res
-        .status(400)
-        .send("You should include a challenge video to challenge someone");
+  // Checking if the challengeVideo is included
+  if (!req.file)
+    return res
+      .status(400)
+      .send("You should include a challenge video to challenge someone");
 
-    updateCollectionPushToArray({
-      Collection: User,
-      filters: {
-        _id: theChallenged._id,
+  updateCollectionPushToArray({
+    Collection: User,
+    filters: {
+      _id: theChallenged._id,
+    },
+    array: "challengeRequests",
+    updates: {
+      challenger: {
+        _id: challenger._id,
+        name: challenger.username,
+        profile: challenger.profile,
+        challengeVideo: { name: req.file.path },
       },
-      array: "challengeRequests",
-      updates: {
-        challenger: {
-          _id: challenger._id,
-          name: challenger.username,
-          profile: challenger.profile,
-          challengeVideo: { name: req.file.path },
-        },
-        challenge: req.body.name,
-        prize: req.body.prize,
-      },
-      res,
-    });
-
-    // Saving the open challenge and returning the response to the client
-  } catch (ex) {
-    res.status(500).send("Something went wrong !!");
-    console.log(ex);
-  }
+      challenge: req.body.name,
+      prize: req.body.prize,
+    },
+    res,
+  });
 };
 
 module.exports.joinChallenge = async (req, res, next) => {
-  try {
-    // Checking if the logged user is in our database
-    const participant = req.user;
-    console.log(participant);
+  // Checking if the logged user is in our database
+  const participant = req.user;
+  console.log(participant);
 
-    // checking if the given challenge exists
-    let challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(400).send("Challenge does not exist !");
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-    // Checking if the user is the owner of the challenge
-    if (challenge.challenger.name === participant.username)
-      return res
-        .status(400)
-        .send("You automatically join the challenge after creating it!");
+  // Checking if the user is the owner of the challenge
+  if (challenge.challenger.name === participant.username)
+    return res
+      .status(400)
+      .send("You automatically join the challenge after creating it!");
 
-    // Checking if the user is not already in the competition
-    let competitor =
-      challenge.participants.length > 0 &&
-      challenge.participants.filter((p) => p._id == participant._id);
-    if (competitor[0])
-      return res.status(400).send("You are already a competitor");
+  // Checking if the user is not already in the competition
+  let competitor =
+    challenge.participants.length > 0 &&
+    challenge.participants.filter((p) => p._id == participant._id);
+  if (competitor[0])
+    return res.status(400).send("You are already a competitor");
 
-    updateCollectionPushToArray({
-      Collection: Challenge,
-      filters: { _id: challenge._id },
-      array: "participants",
-      updates: {
-        _id: participant._id,
-        name: participant.username,
-        profile: participant.profile,
-        challengeVideo: { name: req.file.path },
-      },
-      res,
-    });
-  } catch (ex) {
-    res.status(500).send("Something went wrong");
-    console.log(ex);
-  }
+  updateCollectionPushToArray({
+    Collection: Challenge,
+    filters: { _id: challenge._id },
+    array: "participants",
+    updates: {
+      _id: participant._id,
+      name: participant.username,
+      profile: participant.profile,
+      challengeVideo: { name: req.file.path },
+    },
+    res,
+  });
 };
 
 module.exports.addVideoToChallenge = async (req, res, next) => {
-  try {
-    // checking if the given challenge exists
-    let challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(400).send("Challenge does not exist !");
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-    // Checking if the user is not already in the competition
-    const participant =
-      challenge.participants.length > 0 &&
-      challenge.participants.filter((p) => p.name == req.user.username);
-    if (!participant[0]) return res.status(400).send("Paricipant not found!");
-    console.log("The participant: " + participant[0]);
+  // Checking if the user is not already in the competition
+  const participant =
+    challenge.participants.length > 0 &&
+    challenge.participants.filter((p) => p.name == req.user.username);
+  if (!participant[0]) return res.status(400).send("Paricipant not found!");
+  console.log("The participant: " + participant[0]);
 
-    updateCollectionPushToArray({
-      Collection: Challenge,
-      filters: {
-        _id: req.params.challengeId,
-        "participants.name": participant[0].name,
-      },
-      array: "participants.$.challengeVideo",
-      updates: {
-        name: req.file.path,
-      },
-      res,
-    });
-  } catch (ex) {
-    res.status(500).send("Something went wrong");
-    console.log(ex);
-  }
+  updateCollectionPushToArray({
+    Collection: Challenge,
+    filters: {
+      _id: req.params.challengeId,
+      "participants.name": participant[0].name,
+    },
+    array: "participants.$.challengeVideo",
+    updates: {
+      name: req.file.path,
+    },
+    res,
+  });
 };
 
 module.exports.removeVideoFromChallenge = async (req, res, next) => {
-  try {
-    // validating the removeVideo
-    const { error } = validateremoveVideo(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+  // validating the removeVideo
+  const { error } = validateremoveVideo(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-    // checking if the given challenge exists
-    let challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(400).send("Challenge does not exist !");
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-    // checking if the participant exists
-    const participant =
-      challenge.participants.length > 0 &&
-      challenge.participants.filter((p) => p.name == req.user.username);
+  // checking if the participant exists
+  const participant =
+    challenge.participants.length > 0 &&
+    challenge.participants.filter((p) => p.name == req.user.username);
 
-    if (!participant[0]) return res.status(400).send("Paricipant not found!");
+  if (!participant[0]) return res.status(400).send("Paricipant not found!");
 
-    // Checking if the given video in the participant array
-    const video =
-      participant[0].challengeVideo.length > 0 &&
-      participant[0].challengeVideo.filter((v) => v._id == req.body.videoId);
+  // Checking if the given video in the participant array
+  const video =
+    participant[0].challengeVideo.length > 0 &&
+    participant[0].challengeVideo.filter((v) => v._id == req.body.videoId);
 
-    if (!video[0]) return res.status(400).send("Video not found!");
+  if (!video[0]) return res.status(400).send("Video not found!");
 
-    updateCollectionPullFromArray({
-      Collection: Challenge,
-      filters: {
-        _id: challenge._id,
-        "participants.name": participant.username,
-      },
-      array: "participants.$.challengeVideo",
-      toBeRemoved: {
-        _id: req.body.videoId,
-      },
-      res,
-    });
-  } catch (ex) {
-    res.status(500).send("Something went wrong");
-    console.log(ex);
-  }
+  updateCollectionPullFromArray({
+    Collection: Challenge,
+    filters: {
+      _id: challenge._id,
+      "participants.name": participant.username,
+    },
+    array: "participants.$.challengeVideo",
+    toBeRemoved: {
+      _id: req.body.videoId,
+    },
+    res,
+  });
 };
 
 module.exports.unJoinChallenge = async (req, res, next) => {
-  try {
-    // Checking if the logged user is in our database
-    const participant = req.user;
+  // Checking if the logged user is in our database
+  const participant = req.user;
 
-    // checking if the given challenge exists
-    let challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(400).send("Challenge does not exist !");
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-    // Checking if the user is in the competition
-    let competitor =
-      challenge.participants.length > 0 &&
-      challenge.participants.filter((p) => p._id == participant._id);
-    if (!competitor)
-      return res.status(400).send("You are not  in a  competition");
+  // Checking if the user is in the competition
+  let competitor =
+    challenge.participants.length > 0 &&
+    challenge.participants.filter((p) => p._id == participant._id);
+  if (!competitor)
+    return res.status(400).send("You are not  in a  competition");
 
-    updateCollectionPullFromArray({
-      Collection: Challenge,
-      filters: {
-        _id: challenge._id,
-      },
-      array: "participants",
-      toBeRemoved: {
-        name: participant.username,
-      },
-      res,
-    });
-  } catch (ex) {
-    res.status(500).send("Something went wrong");
-    console.log(ex);
-  }
+  updateCollectionPullFromArray({
+    Collection: Challenge,
+    filters: {
+      _id: challenge._id,
+    },
+    array: "participants",
+    toBeRemoved: {
+      name: participant.username,
+    },
+    res,
+  });
 };
 //comments in challenge
 module.exports.comment = async (req, res, next) => {
-  try {
-    //adding comment to the comment section of the challenge
-    const commenter = req.user.username;
-    const message = req.body.message;
+  //adding comment to the comment section of the challenge
+  const commenter = req.user.username;
+  const message = req.body.message;
 
-    // console.log("Message: "+ message)
-    // challenge.comments.push(commentGroup);
+  // console.log("Message: "+ message)
+  // challenge.comments.push(commentGroup);
 
-    // validating the input message
-    const { error } = validateComments(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+  // validating the input message
+  const { error } = validateComments(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-    updateCollectionPushToArray({
-      Collection: Challenge,
-      filters: { _id: req.params.challengeId },
-      array: "comments",
-      updates: {
-        commenter: commenter,
-        message: message,
-      },
-      res,
-    });
-
-    // Verifying if the challenge exists in the database !
-  } catch (e) {
-    res.status(500).send("Something went wrong!");
-    console.log(e);
-  }
+  updateCollectionPushToArray({
+    Collection: Challenge,
+    filters: { _id: req.params.challengeId },
+    array: "comments",
+    updates: {
+      commenter: commenter,
+      message: message,
+    },
+    res,
+  });
 };
 module.exports.removeComment = async (req, res, next) => {
-  try {
-    // validating the input message
-    const { error } = validateremoveComment(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+  // validating the input message
+  const { error } = validateremoveComment(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-    // Checking if the challenge exists
-    let challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(400).send("Challenge does not exist!");
+  // Checking if the challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist!");
 
-    // Searching for a comment in the challenge
-    const comments =
-      challenge.comments.length > 0 &&
-      challenge.comments.filter((c) => c._id == req.body.commentId);
-    if (!comments[0]) return res.status(400).send("Comment not found !");
+  // Searching for a comment in the challenge
+  const comments =
+    challenge.comments.length > 0 &&
+    challenge.comments.filter((c) => c._id == req.body.commentId);
+  if (!comments[0]) return res.status(400).send("Comment not found !");
 
-    if (comments[0].commenter !== req.user.username)
-      return res
-        .status(403)
-        .send("Access denied! You can not delete this comment!");
+  if (comments[0].commenter !== req.user.username)
+    return res
+      .status(403)
+      .send("Access denied! You can not delete this comment!");
 
-    updateCollectionPullFromArray({
-      Collection: Challenge,
-      filters: {
-        _id: challenge._id,
-        "comments._id": req.body.commentId,
-      },
-      array: "comments",
-      toBeRemoved: {
-        _id: req.body.commentId,
-      },
-      res,
-    });
-  } catch (e) {
-    res.status(500).send("Something went wrong!");
-    console.log(e);
-  }
+  updateCollectionPullFromArray({
+    Collection: Challenge,
+    filters: {
+      _id: challenge._id,
+      "comments._id": req.body.commentId,
+    },
+    array: "comments",
+    toBeRemoved: {
+      _id: req.body.commentId,
+    },
+    res,
+  });
 };
 
 // Getting all comments of a given challenge
 
 module.exports.getAllComments = async (req, res, next) => {
-  try {
-    // Checking if the challenge exists
-    let challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(400).send("Challenge does not exist!");
+  // Checking if the challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist!");
 
-    // Getting all comments
-    getAllDocuments({
-      Collection: Challenge,
-      filter: { _id: challenge._id },
-      fields: { comments: 1 },
-      res,
-    });
-  } catch (ex) {
-    res.status(500).send("something went wrong!");
-    console.log(ex);
-  }
+  // Getting all comments
+  getAllDocuments({
+    Collection: Challenge,
+    filter: { _id: challenge._id },
+    fields: { comments: 1 },
+    res,
+  });
 };
 //adding votes to the participants votes
 module.exports.vote = async (req, res, next) => {
-  try {
-    // validating the user's input(for make challenge form )
-    const { error } = validateVote(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+  // validating the user's input(for make challenge form )
+  const { error } = validateVote(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-    // checking if the given challenge exists
-    let challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(400).send("Challenge does not exist !");
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-    // Checking if the user is not already in the competition
-    let participant =
-      challenge.participants.length > 0 &&
-      challenge.participants.filter((p) => p.name == req.body.participant);
-    if (!participant[0]) return res.status(400).send("Paricipant not found!");
+  // Checking if the user is not already in the competition
+  let participant =
+    challenge.participants.length > 0 &&
+    challenge.participants.filter((p) => p.name == req.body.participant);
+  if (!participant[0]) return res.status(400).send("Paricipant not found!");
 
-    // Checking if the user hasn't voted the given participant already
-    const vote =
-      participant[0].votes.length > 0 &&
-      participant[0].votes.filter((v) => v.name == req.user.username);
+  // Checking if the user hasn't voted the given participant already
+  const vote =
+    participant[0].votes.length > 0 &&
+    participant[0].votes.filter((v) => v.name == req.user.username);
 
-    if (vote[0])
-      return res.status(400).send("You have already voted this participant");
+  if (vote[0])
+    return res.status(400).send("You have already voted this participant");
 
-    updateCollectionPushToArray({
-      Collection: Challenge,
-      filters: {
-        _id: challenge._id,
-        "participants.name": req.body.participant,
-      },
-      array: "participants.$.votes",
-      updates: {
-        _id: req.user._id,
-        name: req.user.username,
-      },
-      res,
-    });
-  } catch (e) {
-    res.status(500).send("Something went wrong!");
-    console.log(e);
-  }
+  updateCollectionPushToArray({
+    Collection: Challenge,
+    filters: {
+      _id: challenge._id,
+      "participants.name": req.body.participant,
+    },
+    array: "participants.$.votes",
+    updates: {
+      _id: req.user._id,
+      name: req.user.username,
+    },
+    res,
+  });
 };
 
 //removing votes to the participants votes
 module.exports.removeVote = async (req, res, next) => {
-  try {
-    // validating the user's input(for make challenge form )
-    const { error } = validateVote(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+  // validating the user's input(for make challenge form )
+  const { error } = validateVote(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-    // checking if the given challenge exists
-    let challenge = await Challenge.findById(req.params.challengeId);
-    if (!challenge) return res.status(400).send("Challenge does not exist !");
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-    // Checking if the user is not already in the competition
-    let participant =
-      challenge.participants.length > 0 &&
-      challenge.participants.filter((p) => p.name == req.body.participant);
-    if (!participant[0]) return res.status(400).send("Paricipant not found!");
+  // Checking if the user is not already in the competition
+  let participant =
+    challenge.participants.length > 0 &&
+    challenge.participants.filter((p) => p.name == req.body.participant);
+  if (!participant[0]) return res.status(400).send("Paricipant not found!");
 
-    // Checking if the user hasn't voted the given participant already
-    const vote =
-      participant[0].votes.length > 0 &&
-      participant[0].votes.filter((v) => v.name == req.user.username);
+  // Checking if the user hasn't voted the given participant already
+  const vote =
+    participant[0].votes.length > 0 &&
+    participant[0].votes.filter((v) => v.name == req.user.username);
 
-    if (!vote[0])
-      return res.status(400).send("You did not vote this participant");
+  if (!vote[0])
+    return res.status(400).send("You did not vote this participant");
 
-    updateCollectionPullFromArray({
-      Collection: Challenge,
-      filters: {
-        _id: challenge._id,
-        "participants.name": req.body.participant,
-      },
-      array: "participants.$.votes",
-      toBeRemoved: {
-        _id: req.user._id,
-        name: req.user.username,
-      },
-      res,
-    });
-
-    // Returning the challenge to client
-  } catch (e) {
-    res.status(500).send("Something went wrong!");
-    console.log(e);
-  }
+  updateCollectionPullFromArray({
+    Collection: Challenge,
+    filters: {
+      _id: challenge._id,
+      "participants.name": req.body.participant,
+    },
+    array: "participants.$.votes",
+    toBeRemoved: {
+      _id: req.user._id,
+      name: req.user.username,
+    },
+    res,
+  });
 };
 
 //searching for user
