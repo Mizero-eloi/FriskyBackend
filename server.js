@@ -1,13 +1,28 @@
+require("express-async-errors");
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const config = require("config");
 const startupDebugger = require("debug")("app:startup");
 const dbDebugger = require("debug")("app:db");
+const unCaughtExceptionDebugger = require("debug")(
+  "app:unCaughtExceptionDebugger"
+);
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const winston = require("winston");
 
+const swaggerDoc = require("./documentation.json");
+const error = require("./middleware/error");
+const { logger } = require("./middleware/logger");
 const app = express();
+
+process.on("uncaughtException", (ex) => {
+  unCaughtExceptionDebugger("WE GOT AN UNCAUGHT EXCEPTION!");
+  logger.error(ex.message, ex);
+});
+
+throw new Error("Something faiiled during startUp!");
 
 const swaggerOptions = {
   swaggerDefinition: {
@@ -24,6 +39,12 @@ const swaggerOptions = {
   apis: ["./routes/*.js"],
 };
 
+app.use(
+  "/documentation",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDoc, false, { docExpansion: "none" })
+);
+
 mongoose
   .connect(config.get("dbConnectionString"), {
     useNewUrlParser: true,
@@ -38,17 +59,10 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 app.use("/signup", require("./routes/userRegistrationRoute"));
 app.use("/login", require("./routes/userLogInRoute"));
-
-const swaggerDoc = require("./documentation.json");
-app.use(
-  "/documentation",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDoc, false, { docExpansion: "none" })
-);
-
 app.use("/makeChallenge", require("./routes/challengeRoute"));
 app.use("/userProfile", require("./routes/userProfile"));
 app.use("/users", require("./routes/userRoute"));
+app.use(error);
 
 const port = process.env.PORT || config.get("serverPort");
 app.listen(port, () => {
