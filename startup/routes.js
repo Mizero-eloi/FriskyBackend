@@ -33,7 +33,7 @@ module.exports = (app) => {
   );
   app.use("/signup", require("../routes/userRegistrationRoute"));
   app.use("/login", require("../routes/userLogInRoute"));
-  app.use("/makeChallenge", require("../routes/challengeRoute"));
+  app.use("/challenge", require("../routes/challengeRoute"));
   app.use("/userProfile", require("../routes/userProfile"));
   app.use("/users", require("../routes/userRoute"));
   app.use(error);
