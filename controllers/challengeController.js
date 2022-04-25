@@ -94,7 +94,8 @@ module.exports.createChallenge = async (req, res, next) => {
       );
     }, transactionOptions);
 
-    // Verifying if  the transaction worked as expected
+    // Returning the newly created challenge to the user
+    res.status(200).send(challenge);
 
     if (transactionResults) {
       console.log("My transaction worked successfully");
