@@ -92,10 +92,9 @@ module.exports.createChallenge = async (req, res, next) => {
         },
         { session, new: true }
       );
+      // Returning the newly created challenge to the user
+      res.status(200).send(challenge);
     }, transactionOptions);
-
-    // Returning the newly created challenge to the user
-    res.status(200).send(challenge);
 
     if (transactionResults) {
       console.log("My transaction worked successfully");
