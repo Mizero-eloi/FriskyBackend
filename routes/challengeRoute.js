@@ -7,10 +7,6 @@ const {
   challengeSomeone,
   unJoinChallenge,
   acceptChallenge,
-<<<<<<< HEAD
-  commentInChallenge,
-  voteInChallenge
-=======
   createChallenge,
   addVideoToChallenge,
   vote,
@@ -21,7 +17,6 @@ const {
   removeVideoFromChallenge,
   getAllChallenges,
   getOneChallenge,
->>>>>>> 900d50abd5a0adee81cf508b03c019521be38426
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -81,8 +76,6 @@ const imageUpload = multer({
 
 const router = express.Router();
 
-<<<<<<< HEAD
-=======
 router.post(
   "/comment/:challengeId",
   auth,
@@ -111,7 +104,6 @@ router.post(
   removeVote
 );
 
->>>>>>> 900d50abd5a0adee81cf508b03c019521be38426
 router.post(
   "/challengeSomeone",
   auth,
@@ -173,23 +165,10 @@ router.get(
   acceptChallenge
 );
 
-<<<<<<< HEAD
-router.post(
-  "/commentInChallenge/:challengeId", 
-  auth,validateParameterId("challengeId"), 
-  commentInChallenge
-);
-
-router.post(
-  "/voteInChallenge/:challengeId", 
-  auth,validateParameterId("challengeId"), 
-  voteInChallenge
-=======
 router.get(
   "/getAllComments/:challengeId",
   validateParameterId("challengeId"),
   getAllComments
->>>>>>> 900d50abd5a0adee81cf508b03c019521be38426
 );
 
 module.exports = router;

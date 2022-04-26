@@ -793,7 +793,7 @@
               }
             }
           }
-        },
+        ],
         "schema": { "$ref": "#/definitions/Challenge" },
         "responses": {
           "201": {
