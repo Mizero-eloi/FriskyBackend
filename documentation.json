@@ -196,7 +196,7 @@
         }
       }
     },
-    "/makeChallenge": {
+    "/challenge": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -262,7 +262,7 @@
         }
       }
     },
-    "/makeChallenge/{challengeId}": {
+    "/challenge/{challengeId}": {
       "get": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -286,9 +286,41 @@
           "400": { "description": "Bad request" },
           "500": { "description": "Server error" }
         }
+      },
+      "delete": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "path",
+            "name": "challengeId",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/Challenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/Challenge"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
       }
     },
-    "/makeChallenge/addVideotoChallenge/{challengeId}": {
+    "/challenge/addVideotoChallenge/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["multipart/form-data"],
@@ -327,7 +359,7 @@
         }
       }
     },
-    "/makeChallenge/removeVideoFromChallenge/{challengeId}": {
+    "/challenge/removeVideoFromChallenge/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["multipart/form-data"],
@@ -371,7 +403,7 @@
         }
       }
     },
-    "/makeChallenge/uploadChallengeCoverphoto/{challengeId}": {
+    "/challenge/uploadChallengeCoverphoto/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["multipart/form-data"],
@@ -410,7 +442,7 @@
         }
       }
     },
-    "/makeChallenge/joinChallenge/{challengeId}": {
+    "/challenge/joinChallenge/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["multipart/form-data"],
@@ -449,7 +481,7 @@
         }
       }
     },
-    "/makeChallenge/vote/{challengeId}": {
+    "/challenge/vote/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -493,7 +525,7 @@
         }
       }
     },
-    "/makeChallenge/removeVote/{challengeId}": {
+    "/challenge/removeVote/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -537,7 +569,7 @@
         }
       }
     },
-    "/makeChallenge/unjoinChallenge/{challengeId}": {
+    "/challenge/unjoinChallenge/{challengeId}": {
       "get": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -571,7 +603,7 @@
         }
       }
     },
-    "/makeChallenge/comment/{challengeId}": {
+    "/challenge/comment/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -615,7 +647,7 @@
         }
       }
     },
-    "/makeChallenge/removeComment/{challengeId}": {
+    "/challenge/removeComment/{challengeId}": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -659,7 +691,7 @@
         }
       }
     },
-    "/makeChallenge/getAllComments/{challengeId}": {
+    "/challenge/getAllComments/{challengeId}": {
       "get": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -685,7 +717,7 @@
         }
       }
     },
-    "/makeChallenge/testChallenge": {
+    "/challenge/testChallenge": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -714,7 +746,7 @@
         ]
       }
     },
-    "/makeChallenge/challengeSomeone": {
+    "/challenge/challengeSomeone": {
       "post": {
         "tags": ["challenge"],
         "consumes": ["application/json"],
@@ -761,7 +793,7 @@
         }
       }
     },
-    "/makeChallenge/acceptChallenge/{challengeId}": {
+    "/challenge/acceptChallenge/{challengeId}": {
       "get": {
         "tags": ["challenge"],
         "consumes": ["application/json"],

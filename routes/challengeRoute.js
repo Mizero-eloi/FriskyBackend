@@ -17,62 +17,14 @@ const {
   removeVideoFromChallenge,
   getAllChallenges,
   getOneChallenge,
+  deleteChallenge,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
+const { ImageUpload, VideoUpload } = require("../services/fileUpload");
 
-// configuring multer and indicating the destination folder
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, new Date().toISOString().replace(/:/g, "_") + file.originalname);
-  },
-});
-
-const fileFilter = (req, file, cb) => {
-  if (!file.originalname.match(/\.(mp4|MPEG-4|mkv|WebM|OGG)$/)) {
-    return cb(null, false);
-  }
-  cb(null, true);
-};
-
-const upload = multer({
-  storage,
-  limits: {
-    fileSize: 1024 * 1024 * 20, // 20 MBs
-  },
-  fileFilter,
-});
-
-const Imagestorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./ImageUploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, new Date().toISOString().replace(/:/g, "_") + file.originalname);
-  },
-});
-
-const ImageFilter = (req, file, cb) => {
-  if (
-    file.mimetype === "image/jpeg" ||
-    file.mimetype === "image/png" ||
-    file.mimetype === "image/jpg"
-  ) {
-    return cb(null, true);
-  }
-  cb(null, false);
-};
-
-const imageUpload = multer({
-  storage: Imagestorage,
-  limits: {
-    fileSize: 1024 * 1024 * 5, // 5 MBs
-  },
-  fileFilter: ImageFilter,
-});
+const imageUpload = new ImageUpload();
+const videoUpload = new VideoUpload();
 
 const router = express.Router();
 
@@ -107,10 +59,15 @@ router.post(
 router.post(
   "/challengeSomeone",
   auth,
-  upload.single("challengeVideo"),
+  videoUpload.upload.single("challengeVideo"),
   challengeSomeone
 );
-router.post("/", auth, upload.single("challengeVideo"), createChallenge);
+router.post(
+  "/",
+  auth,
+  videoUpload.upload.single("challengeVideo"),
+  createChallenge
+);
 // Route to get all challenges
 router.get("/", getAllChallenges);
 // Route to get one challenge
@@ -119,12 +76,18 @@ router.get(
   validateParameterId("challengeId"),
   getOneChallenge
 );
+// Route to delete challenge
+router.delete(
+  "/:challengeId",
+  validateParameterId("challengeId"),
+  deleteChallenge
+);
 
 router.post(
   "/addVideotoChallenge/:challengeId",
   auth,
   validateParameterId("challengeId"),
-  upload.single("challengeVideo"),
+  videoUpload.upload.single("challengeVideo"),
   addVideoToChallenge
 );
 
@@ -139,7 +102,7 @@ router.post(
   "/uploadChallengeCoverphoto/:challengeId",
   auth,
   validateParameterId("challengeId"),
-  imageUpload.single("coverPhoto"),
+  imageUpload.upload.single("coverPhoto"),
   uploadChallengeCoverPhoto
 );
 
@@ -147,7 +110,7 @@ router.post(
   "/joinChallenge/:challengeId",
   auth,
   validateParameterId("challengeId"),
-  upload.single("challengeVideo"),
+  videoUpload.upload.single("challengeVideo"),
   joinChallenge
 );
 
