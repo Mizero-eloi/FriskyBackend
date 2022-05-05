@@ -927,10 +927,10 @@
         }
       }
     },
-    "/makeChallenge/searchUser": {
+    "/users/searchUser": {
       "post": {
-        "tags": ["challenge"],
-        "consumes": ["multipart/form-data"],
+        "tags": ["user"],
+        "consumes": ["application/json"],
         "produces": ["application/json"],
         "parameters": [
           {
@@ -942,10 +942,15 @@
             "required": "true"
           },
           {
-            "in":"formData",
-            "name":"UserToSearch",
-            "type":"string",
-            "example":"BadBoy"
+            "in":"body",
+            "name":"body",
+            "properties":{
+              "UserToSearch":{
+                "type":"string",
+              "example":"NshutiJabes"
+              }
+            }
+          
           }
         ],
         "schema": { "$ref": "#/definitions/searchUser" },
@@ -953,6 +958,43 @@
           "201": {
             "description": "success",
             "$ref": "#/definitions/searchUser"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/challenge/searchChallenge": {
+      "post": {
+        "tags": ["challenge"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in":"body",
+            "name":"body",
+            "properties":{
+              "ChallengeToSearch":{
+                "type":"string",
+              "example":"myTestChallenge"
+              }
+            }
+          
+          }
+        ],
+        "schema": { "$ref": "#/definitions/searchChallenge" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/searchChallenge"
           },
           "400": { "description": "Bad request" },
           "500": { "description": "Server error" }
@@ -1099,6 +1141,18 @@
       ],
       "properties": {
         "UserToSearch": {
+          "type": "string"
+        }
+      }
+    },
+    "searchChallenge": {
+      "type": "object",
+      "content": "application/json",
+      "required": [
+        "ChallengeToSearch"
+      ],
+      "properties": {
+        "ChallengeToSearch": {
           "type": "string"
         }
       }
