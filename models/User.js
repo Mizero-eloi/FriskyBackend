@@ -28,6 +28,32 @@ const userSchema = new mongoose.Schema({
     maxlength: 50,
   },
 
+  followers: {
+    type: [
+      new mongoose.Schema({
+        username: {
+          type: String,
+          minlength: 5,
+          maxlength: 50,
+          required: true,
+        },
+      }),
+    ],
+  },
+
+  following: {
+    type: [
+      new mongoose.Schema({
+        username: {
+          type: String,
+          minlength: 5,
+          maxlength: 50,
+          required: true,
+        },
+      }),
+    ],
+  },
+
   gender: {
     type: String,
     enum: ["male", "female", "prefer not to say"],

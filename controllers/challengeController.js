@@ -400,6 +400,7 @@ module.exports.getAllComments = async (req, res, next) => {
     res,
   });
 };
+
 //adding votes to the participants votes
 module.exports.vote = async (req, res, next) => {
   // validating the user's input(for make challenge form )

@@ -910,6 +910,78 @@
           "500": { "description": "Server error" }
         }
       }
+    },
+    "/users/follow": {
+      "post": {
+        "tags": ["user"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "userToFollow": {
+                "type": "string",
+                "example": "afroKiller"
+              }
+            }
+          }
+        ],
+        "schema": { "$ref": "#/definitions/follow" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/follow"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/users/unFollow": {
+      "post": {
+        "tags": ["user"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "properties": {
+              "userToUnFollow": {
+                "type": "string",
+                "example": "afroKiller"
+              }
+            }
+          }
+        ],
+        "schema": { "$ref": "#/definitions/unFollow" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/unFollow"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
     }
     
   },
@@ -1039,6 +1111,30 @@
       ],
       "properties": {
         "votedParticipant": {
+          "type": "string"
+        }
+      }
+    },
+    "follow": {
+      "type": "object",
+      "content": "application/json",
+      "required": [
+        "userToFollow"
+      ],
+      "properties": {
+        "userToFollow": {
+          "type": "string"
+        }
+      }
+    },
+    "unFollow": {
+      "type": "object",
+      "content": "application/json",
+      "required": [
+        "userToUnFollow"
+      ],
+      "properties": {
+        "userToUnFollow": {
           "type": "string"
         }
       }

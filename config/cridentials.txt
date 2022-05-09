@@ -2,5 +2,5 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MjE3OTA3MjVkYmIxMjIzMzg5ZWEyY2M
 
 challengeId = 621cc01e240a2b09e42bcfc8
 
-set DEBUG=app:* && set FriskyServerPort=5000 && set mySecurekey=frisky && set FriskyDbConnectionString=mongodb+srv://eloi:ae789789@frisky.co2th.mongodb.net/Frisky
+set DEBUG=app:* && set FriskyServerPort=5000 && set mySecurekey=frisky && set FriskyDbConnectionString=mongodb+srv://eloi:ae789789@frisky.co2th.mongodb.net/Frisky npm start
 
