@@ -18,6 +18,7 @@ const {
   updateCollectionPullFromArray,
 } = require("../services/queries");
 const { startSession } = require("mongoose");
+const { isEmpty } = require("lodash");
 
 module.exports.createChallenge = async (req, res, next) => {
   // validating the user's input(for make challenge form )
@@ -477,35 +478,26 @@ module.exports.removeVote = async (req, res, next) => {
   });
 };
 
-//searching for user
-module.exports.searchUser = async (req, res, next) => {
-  //user input
-  const userPattern = new ReqExp("^" + req.body.query);
-
-  //searching for the user
-  User.find({ username: { $regex: userPattern } })
-    .then((user) => {
-      return res.status(200).send(user);
-    })
-    .catch((err) => {
-      return res.status(404).send("User not found", err[0].message);
-    });
-};
-
 //searching for challenge
-module.exports.searchUser = async (req, res, next) => {
+module.exports.searchChallenge = async (req, res, next) => {
   //user input
-  const userPattern = new ReqExp("^" + req.body.query);
-
-  //searching for the user
-  Challenge.find({ name: { $regex: userPattern } })
-    .then((challenge) => {
-      return res.status(200).send(challenge);
-    })
-    .catch((err) => {
-      return res.status(404).send("User not found", err[0].message);
+  console.log(req.body.ChallengeToSearch);
+  //searching for the challenge
+  let data = await Challenge.find(
+    {
+      "$or": [
+        {name: {$regex: req.body.ChallengeToSearch}}
+      ]
     });
+
+    if(!isEmpty(data)){
+      return res.status(200).send(data); 
+    }else{
+      return res.status(400).send("No challenge with the given name!");
+    }
+
 };
+
 module.exports.acceptChallenge = async (req, res, next) => {
   // Creating a session for a transaction
   const session = await startSession();

@@ -18,6 +18,7 @@ const {
   getAllChallenges,
   getOneChallenge,
   deleteChallenge,
+  searchChallenge,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -132,6 +133,12 @@ router.get(
   "/getAllComments/:challengeId",
   validateParameterId("challengeId"),
   getAllComments
+);
+
+router.post(
+  "/searchChallenge", 
+  auth, 
+  searchChallenge
 );
 
 module.exports = router;
