@@ -1,6 +1,7 @@
 const { isEmpty } = require("lodash");
 const { User } = require("../models/User");
 const { getAllDocuments, updateCollectionPushToArray, updateCollectionPullFromArray } = require("../services/queries");
+const { startSession } = require("mongoose");
 
 // Get all users
 module.exports.getAllUsers = async (req, res) => {
@@ -34,43 +35,97 @@ module.exports.follow = async (req, res, next) => {
 
   //user to follow
   const userToFollow = req.body.userToFollow;
-  console.log("User to follow: " + userToFollow);
 
   // Getting the person who wants to follow someone
   const user = req.user.username;
-  console.log("User : " + user);
 
 
   //Checking if there is a user with such username
   const isAvailable = await User.findOne({username: userToFollow});
-  if(!isAvailable){
-    res.status(400).send("The user doesn't exist");
-  }
-  console.log("the user is available "+ isAvailable);
+  if(!isAvailable) return res.status(400).send("The user doesn't exist");
+  
 
   //checking if the user has not already followed 
   const follower = 
     isAvailable.followers.length > 0 &&
     isAvailable.followers.filter((f) => f.username == user);
 
-  if(follower[0]){
-    res.status(400).send("You've already followed this user");
-  }
+  if(follower[0]) return res.status(400).send("You've already followed this user");
 
-  //adding the user to userToFollow's followers
-  updateCollectionPushToArray({
-    Collection: User,
-    filters: {
-      "username": userToFollow
-    },
-    array: "followers",
-    updates: {
-      "username": user,
-      "_id": req.user._id
-    },
-    res
-  });
+      // Creating a session for a transaction
+      const session = await startSession();
 
+      const transactionOptions = {
+        readPreference: "primary",
+        readConcern: { level: "local" },
+        writeConern: { w: "majority" },
+      };
+  
+      try{
+  
+        const transactionResults = await session.withTransaction(async () => {
+
+
+          //adding the user to userToFollow's followers
+          const user_being_followed = await User.findOneAndUpdate(
+            { username: userToFollow},
+            {
+              $push: {
+                "followers": {
+                  username: user,
+                  _id: req.user._id
+                },
+              },
+            },
+            { session, new: true }
+          );
+
+          if (!user_being_followed) {
+            session.abortTransaction();
+            return res
+              .status(400)
+              .send("Xorry, there was no request to this challenge!");
+          }
+
+          //adding the user to userToFollow's following
+
+          const user_following = await User.findOneAndUpdate(
+            { username: user},
+            {
+              $push: {
+                "following": {
+                  username: userToFollow,
+                  _id: isAvailable._id
+                },
+              },
+            },
+            { session, new: true }
+          );
+
+          
+          if (!user_following) {
+            session.abortTransaction();
+            return res
+              .status(400)
+              .send("Xorry, there is no user with this username!");
+          }
+
+          res.status(200).send(user_following);
+          
+        }, transactionOptions);
+
+        if (transactionResults) {
+          console.log("My transaction worked successfully");
+        } else {
+          console.log("The transaction was intentionally aborted !!");
+        }
+        
+      }catch(ex){
+        res.status(500).send("Something went wrong !");
+        console.log("The transaction was aborted due to some errors " + ex);
+      }finally {
+        await session.endSession();
+      }
 }
 
 module.exports.unFollow = async (req, res, next) => {
@@ -89,7 +144,6 @@ module.exports.unFollow = async (req, res, next) => {
   if(!isAvailable){
     res.status(400).send("The user doesn't exist");
   }
-  console.log("the user is available "+ isAvailable);
 
   //checking if the user has already followed 
   const follower = 
@@ -100,18 +154,79 @@ module.exports.unFollow = async (req, res, next) => {
     res.status(400).send("You haven't yet followed this user");
   }
 
-  //removing the user from userToUnFollow's followers
-  updateCollectionPullFromArray({
-    Collection: User,
-    filters:{
-      "username": userToUnFollow
-    },
-    array: "followers",
-    toBeRemoved: {
-      username: user,
-      _id: req.user._id
-    },
-    res,
-  });
+   // Creating a session for a transaction
+   const session = await startSession();
+
+   const transactionOptions = {
+     readPreference: "primary",
+     readConcern: { level: "local" },
+     writeConern: { w: "majority" },
+   };
+
+   try{
+
+     const transactionResults = await session.withTransaction(async () => {
+
+
+       //removing the user to userToFollow's followers
+       const user_being_unFollowed = await User.findOneAndUpdate(
+         { username: userToUnFollow},
+         {
+           $pull: {
+             "followers": {
+               username: user,
+               _id: req.user._id
+             },
+           },
+         },
+         { session, new: true }
+       );
+
+       if (!user_being_unFollowed) {
+         session.abortTransaction();
+         return res
+           .status(400)
+           .send("Xorry, there is no user with this username!");
+       }
+
+       //removing the userToUnFollow's from user following
+
+       const user_unFollowing = await User.findOneAndUpdate(
+         { username: user},
+         {
+           $pull: {
+             "following": {
+               username: userToUnFollow,
+               _id: isAvailable._id
+             },
+           },
+         },
+         { session, new: true }
+       );
+
+       
+       if (!user_unFollowing) {
+         session.abortTransaction();
+         return res
+           .status(400)
+           .send("Xorry, there is no user with such a username!");
+       }
+
+       res.status(200).send(user_unFollowing);
+       
+     }, transactionOptions);
+
+     if (transactionResults) {
+       console.log("My transaction worked successfully");
+     } else {
+       console.log("The transaction was intentionally aborted !!");
+     }
+     
+   }catch(ex){
+     res.status(500).send("Something went wrong !");
+     console.log("The transaction was aborted due to some errors " + ex);
+   }finally {
+     await session.endSession();
+   }
 
 }
