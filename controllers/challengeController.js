@@ -19,6 +19,7 @@ const {
 } = require("../services/queries");
 const { startSession } = require("mongoose");
 const { isEmpty } = require("lodash");
+const schedule = require("node-schedule");
 
 module.exports.createChallenge = async (req, res, next) => {
   // validating the user's input(for make challenge form )
@@ -567,4 +568,33 @@ module.exports.acceptChallenge = async (req, res, next) => {
   } finally {
     await session.endSession();
   }
+};
+
+
+module.exports.Winner = async (req, res, next) => {
+
+  console.log(new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''));
+
+// checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
+
+  const timeToVote = challenge.deadLineToVote;
+
+
+  // After saving the creating the challenge we need to schedule when to announce the winner
+  schedule.scheduleJob('announceWinner', timeToVote, () => {
+    const winner = 
+    challenge.participants.length > 0 &&
+    challenge.participants.filter((p) => Math.max(p.votes.length));
+    
+    console.log("Winner: " + winner + " at time: "+ timeToVote);
+
+    if (!winner) {
+    return res.status(400).send("There is no winner");
+    }
+    res.status(200).send(winner);
+
+    schedule.cancelJob('announceWinner');
+  });
 };

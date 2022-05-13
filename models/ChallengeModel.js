@@ -18,10 +18,6 @@ const challengeSchema = new mongoose.Schema({
   deadLineToVote: {
     type: Date,
   },
-  deadLineTimeToVote: {
-    type: String,
-    match: /^([01]\d|2[0-3]):?([0-5]\d)$/,
-  },
   coverPhoto: {
     type: String,
   },

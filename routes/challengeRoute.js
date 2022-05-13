@@ -19,6 +19,7 @@ const {
   getOneChallenge,
   deleteChallenge,
   searchChallenge,
+  Winner,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -139,6 +140,12 @@ router.post(
   "/searchChallenge", 
   auth, 
   searchChallenge
+);
+
+router.post(
+  "/Winner/:challengeId",
+  validateParameterId("challengeId"),
+  Winner
 );
 
 module.exports = router;
