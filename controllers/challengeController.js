@@ -593,8 +593,50 @@ module.exports.Winner = async (req, res, next) => {
     if (!winner) {
     return res.status(400).send("There is no winner");
     }
+    
+    winner.wins += 1;
+
+
     res.status(200).send(winner);
 
     schedule.cancelJob('announceWinner');
   });
 };
+
+
+
+module.exports.trendingStar = async (req, res, next ) => {
+ 
+      const challenges = await Challenge.find();
+      //here we are going to first get the trending challenge based on the challenge with the most participants
+      let trendingChallenge = {};
+      let maxParticipants = 0;
+
+      await challenges.filter((c) => {
+        if(c.participants.length >= maxParticipants){
+          maxParticipants = c.participants.length;
+          trendingChallenge = c;
+        };
+      });
+
+      console.log("The trending challenge is : "+ trendingChallenge);
+      console.log("The number of participants in the trending challenge is : "+ trendingChallenge.participants.length);
+
+      // if(!trendingChallenge){
+      //   res.status(200).send("Challenge doesn't exist!");
+      // }
+      let maxVotes = 0;
+      let trendingStar = {};
+      console.log("The participants: " + trendingChallenge.participants);
+      //trending person based on his/her votes from the trending challenge
+      await trendingChallenge.participants.filter((p) => {
+        if(p.votes.length >= maxVotes){
+          maxVotes = p.votes.length;
+          trendingStar = p;
+        };
+      });
+
+      console.log("The trending star is : "+ trendingStar);
+      res.status(200).send(trendingStar);
+
+}

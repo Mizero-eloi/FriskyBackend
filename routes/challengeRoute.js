@@ -20,6 +20,7 @@ const {
   deleteChallenge,
   searchChallenge,
   Winner,
+  trendingStar,
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -29,6 +30,12 @@ const imageUpload = new ImageUpload();
 const videoUpload = new VideoUpload();
 
 const router = express.Router();
+
+router.get(
+  "/trendingStar",
+  auth,
+  trendingStar
+);
 
 router.post(
   "/comment/:challengeId",
@@ -147,5 +154,7 @@ router.post(
   validateParameterId("challengeId"),
   Winner
 );
+
+
 
 module.exports = router;
