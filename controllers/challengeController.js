@@ -640,3 +640,15 @@ module.exports.trendingStar = async (req, res, next ) => {
       res.status(200).send(trendingStar);
 
 }
+
+module.exports.getAllParticipants = async (req, res, next) => {
+  const challengeId = req.params.challengeId;
+
+  const challenge = await Challenge.findById(challengeId);
+  if(!challenge) return res.status(400).send("There is no challenge with the specified id");
+  const participants = challenge.participants;
+  console.log("The participants: " + participants);
+
+  res.status(200).send(participants);
+
+}
