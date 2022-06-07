@@ -21,7 +21,7 @@ const {
   searchChallenge,
   Winner,
   trendingStar,
-  getAllParticipants,
+  getAllParticipants
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
@@ -160,6 +160,8 @@ router.post("/getAllParticipants/:challengeId",
   validateParameterId("challengeId"),
   getAllParticipants
 )
+
+
 
 
 

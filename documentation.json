@@ -1030,6 +1030,32 @@
         }
       }
     },
+    "/users/getAllParticipatedInChallenges": {
+      "post": {
+        "tags": ["user"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-auth-token",
+            "schema": {
+              "type": "string"
+            },
+            "required": "true"
+          }
+        ],
+        "schema": { "$ref": "#/definitions/getAllParticipatedInChallenges" },
+        "responses": {
+          "201": {
+            "description": "success",
+            "$ref": "#/definitions/getAllParticipatedInChallenges"
+          },
+          "400": { "description": "Bad request" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
     "/challenge/getAllParticipants/{challengeId}": {
       "post": {
         "tags": ["challenge"],
@@ -1127,6 +1153,16 @@
       }
     },
     "trendingStar": {
+      "type": "object",
+      "content": "application/json",
+      "required": "x-auth-token",
+      "properties": {
+        "x-auth-token": {
+          "type": "string"
+        }
+      }
+    },
+    "getAllParticipatedInChallenges": {
       "type": "object",
       "content": "application/json",
       "required": "x-auth-token",

@@ -2,6 +2,7 @@ const { isEmpty } = require("lodash");
 const { User } = require("../models/User");
 const { getAllDocuments, updateCollectionPushToArray, updateCollectionPullFromArray } = require("../services/queries");
 const { startSession } = require("mongoose");
+const { Challenge } = require("../models/ChallengeModel");
 
 // Get all users
 module.exports.getAllUsers = async (req, res) => {
@@ -228,5 +229,31 @@ module.exports.unFollow = async (req, res, next) => {
    }finally {
      await session.endSession();
    }
+
+}
+
+module.exports.getAllParticipatedInChallenges = async (req, res) => {
+  const username = req.user.username;
+  const challenges = await Challenge.find();
+  const length = challenges.length;
+  let i = 0;
+  let allParticipatedInChallenges=[];
+
+  for(i; i<length; i++){
+    if(await challenges[i].participants.filter((p) => p.name == username)){
+      allParticipatedInChallenges.push(challenges[i]);
+    }
+  }
+
+
+  if(!allParticipatedInChallenges){
+    res
+    .status(400)
+    .send("Xorry, You haven't participated in any challenges.");
+  }
+
+  console.log("All challenges participated in by "+ username +": " + allParticipatedInChallenges);
+
+  return res.status(200).send(allParticipatedInChallenges);
 
 }

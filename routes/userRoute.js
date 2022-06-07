@@ -4,7 +4,8 @@ const {
     getAllUsers,
     searchUser, 
     follow,
-    unFollow} = require("../controllers/userController");
+    unFollow,
+    getAllParticipatedInChallenges} = require("../controllers/userController");
 const router = express.Router();
 
 router.get("/", getAllUsers);
@@ -21,5 +22,11 @@ router.post(
     "/unFollow", 
     auth, 
     unFollow);
+
+router.post(
+    "/getAllParticipatedInChallenges", 
+    auth, 
+    getAllParticipatedInChallenges
+);
 
 module.exports = router;
