@@ -36,6 +36,10 @@
                 "type": "string",
                 "example": "friskyDev@gmail.com"
               },
+              "username": {
+                "type": "string",
+                "example": "user001"
+              },
               "password": { "type": "string", "example": "12345" }
             }
           }

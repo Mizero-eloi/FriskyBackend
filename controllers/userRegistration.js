@@ -2,23 +2,25 @@ const {
   User,
   validateUserEntry,
   validateUserProfile,
+  validateUserRegistration,
 } = require("../models/User");
 const _ = require("lodash");
 const bcrypt = require("bcrypt");
 
 module.exports.userRegistration = async (req, res, next) => {
   // validate the user's given data and return if it is not valid
-  const { error } = validateUserEntry(req.body);
+  const { error } = validateUserRegistration(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
   // checking if the user  already exists and return it true
 
   let user = await User.findOne({
     email: req.body.email,
+    username: req.body.username
   });
   if (user) return res.status(400).send("User does already exists !");
 
-  user = new User(_.pick(req.body, ["email", "password"]));
+  user = new User(_.pick(req.body, ["email", "password", "username"]));
 
   // hashing the password
 
@@ -27,5 +29,5 @@ module.exports.userRegistration = async (req, res, next) => {
   // saving the user and providing them token
   await user.save();
   const token = user.generateAuthToken();
-  return res.header("x-auth-token", token).send(_.pick(user, ["email"]));
+  return res.header("x-auth-token", token).send(_.pick(user, ["email", "username"]));
 };
