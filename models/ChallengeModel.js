@@ -18,10 +18,6 @@ const challengeSchema = new mongoose.Schema({
   deadLineToVote: {
     type: Date,
   },
-  deadLineTimeToVote: {
-    type: String,
-    match: /^([01]\d|2[0-3]):?([0-5]\d)$/,
-  },
   coverPhoto: {
     type: String,
   },
@@ -114,10 +110,7 @@ const validateChallengePost = (challenge) => {
     name: Joi.string().min(2).max(255).required(),
     prize: Joi.string().min(5).max(255).required(),
     challengeVideo: Joi.string(),
-    deadLineToVote: Joi.date().required(),
-    deadLineTimeToVote: Joi.string()
-      .regex(/^([01]\d|2[0-3]):?([0-5]\d)$/)
-      .required(),
+    deadLineToVote: Joi.date().required()
   });
 
   return schema.validate(challenge);

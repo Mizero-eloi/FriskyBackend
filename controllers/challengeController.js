@@ -19,6 +19,7 @@ const {
 } = require("../services/queries");
 const { startSession } = require("mongoose");
 const { isEmpty } = require("lodash");
+const schedule = require("node-schedule");
 
 module.exports.createChallenge = async (req, res, next) => {
   // validating the user's input(for make challenge form )
@@ -400,6 +401,7 @@ module.exports.getAllComments = async (req, res, next) => {
     res,
   });
 };
+
 //adding votes to the participants votes
 module.exports.vote = async (req, res, next) => {
   // validating the user's input(for make challenge form )
@@ -567,3 +569,86 @@ module.exports.acceptChallenge = async (req, res, next) => {
     await session.endSession();
   }
 };
+
+
+module.exports.Winner = async (req, res, next) => {
+
+  console.log(new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''));
+
+// checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
+
+  const timeToVote = challenge.deadLineToVote;
+
+
+  // After saving the creating the challenge we need to schedule when to announce the winner
+  schedule.scheduleJob('announceWinner', timeToVote, () => {
+    const winner = 
+    challenge.participants.length > 0 &&
+    challenge.participants.filter((p) => Math.max(p.votes.length));
+    
+    console.log("Winner: " + winner + " at time: "+ timeToVote);
+
+    if (!winner) {
+    return res.status(400).send("There is no winner");
+    }
+    
+    winner.wins += 1;
+
+
+    res.status(200).send(winner);
+
+    schedule.cancelJob('announceWinner');
+  });
+};
+
+
+
+module.exports.trendingStar = async (req, res, next ) => {
+ 
+      const challenges = await Challenge.find();
+      //here we are going to first get the trending challenge based on the challenge with the most participants
+      let trendingChallenge = {};
+      let maxParticipants = 0;
+
+      await challenges.filter((c) => {
+        if(c.participants.length >= maxParticipants){
+          maxParticipants = c.participants.length;
+          trendingChallenge = c;
+        };
+      });
+
+      console.log("The trending challenge is : "+ trendingChallenge);
+      console.log("The number of participants in the trending challenge is : "+ trendingChallenge.participants.length);
+
+      // if(!trendingChallenge){
+      //   res.status(200).send("Challenge doesn't exist!");
+      // }
+      let maxVotes = 0;
+      let trendingStar = {};
+      console.log("The participants: " + trendingChallenge.participants);
+      //trending person based on his/her votes from the trending challenge
+      await trendingChallenge.participants.filter((p) => {
+        if(p.votes.length >= maxVotes){
+          maxVotes = p.votes.length;
+          trendingStar = p;
+        };
+      });
+
+      console.log("The trending star is : "+ trendingStar);
+      res.status(200).send(trendingStar);
+
+}
+
+module.exports.getAllParticipants = async (req, res, next) => {
+  const challengeId = req.params.challengeId;
+
+  const challenge = await Challenge.findById(challengeId);
+  if(!challenge) return res.status(400).send("There is no challenge with the specified id");
+  const participants = challenge.participants;
+  console.log("The participants: " + participants);
+
+  res.status(200).send(participants);
+
+}

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 const config = require("config");
 const jwt = require("jsonwebtoken");
+const { toInteger } = require("lodash");
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -26,6 +27,37 @@ const userSchema = new mongoose.Schema({
     type: String,
     minlength: 5,
     maxlength: 50,
+  },
+
+  followers: {
+    type: [
+      new mongoose.Schema({
+        username: {
+          type: String,
+          minlength: 5,
+          maxlength: 50,
+          required: true,
+        },
+      }),
+    ],
+  },
+
+  following: {
+    type: [
+      new mongoose.Schema({
+        username: {
+          type: String,
+          minlength: 5,
+          maxlength: 50,
+          required: true,
+        },
+      }),
+    ],
+  },
+
+  wins: {
+    type: Number,
+    default: 0
   },
 
   gender: {
