@@ -140,6 +140,15 @@ const validateUserEntry = (user) => {
 
   return schema.validate(user);
 };
+const validateUserRegistration = (user) => {
+  const schema = Joi.object().keys({
+    username: Joi.string().min(5).max(50).required(),
+    email: Joi.string().min(5).max(255).required().email(),
+    password: Joi.string().min(5).max(8).required(),
+  });
+
+  return schema.validate(user);
+};
 
 const validateUserProfile = (profile) => {
   const schema = Joi.object().keys({
@@ -154,5 +163,6 @@ const validateUserProfile = (profile) => {
 };
 
 module.exports.User = User;
+module.exports.validateUserRegistration = validateUserRegistration;
 module.exports.validateUserEntry = validateUserEntry;
 module.exports.validateUserProfile = validateUserProfile;
