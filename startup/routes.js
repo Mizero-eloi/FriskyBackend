@@ -5,6 +5,7 @@ const error = require("../middleware/error");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDoc = require("../documentation.json");
 const swaggerJsDoc = require("swagger-jsdoc");
+const cors = require("cors");
 
 const swaggerOptions = {
   swaggerDefinition: {
@@ -22,6 +23,12 @@ const swaggerOptions = {
 };
 
 module.exports = (app) => {
+  app.use(
+    cors({
+      origin: "*",
+      credentials: true,
+    })
+  );
   app.use(express.static("uploads"));
   app.use(express.static("ImageUploads"));
   app.use(bodyParser.json({ limit: "50mb" }));
