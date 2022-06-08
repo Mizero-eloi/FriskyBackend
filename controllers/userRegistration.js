@@ -14,13 +14,19 @@ module.exports.userRegistration = async (req, res, next) => {
 
   // checking if the user  already exists and return it true
 
-  let user = await User.findOne({
-    email: req.body.email,
+  let email = await User.findOne({
+    email: req.body.email
+  });
+
+  if (email) return res.status(400).send("Email does already exists !");
+
+  let username = await User.findOne({
     username: req.body.username
   });
-  if (user) return res.status(400).send("User does already exists !");
 
-  user = new User(_.pick(req.body, ["email", "password", "username"]));
+  if (username) return res.status(400).send("Username does already exists !");
+
+  const user = new User(_.pick(req.body, ["email", "password", "username"]));
 
   // hashing the password
 
