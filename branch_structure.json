@@ -1,0 +1,21 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "eloi",
+    "jabes",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "eloi": "main",
+    "jabes": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "eloi",
+    "jabes",
+    "origin"
+  ]
+}

@@ -23,6 +23,6 @@ module.exports.userLogIn = async (req, res, next) => {
 
   return res
     .header("x-auth-token", token)
-    .header("access-control-expose-headers")
+    .header("access-control-expose-headers", "x-auth-token")
     .send("Logged In successfully !");
 };

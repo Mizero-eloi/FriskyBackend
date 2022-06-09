@@ -37,6 +37,6 @@ module.exports.userRegistration = async (req, res, next) => {
   const token = user.generateAuthToken();
   return res
     .header("x-auth-token", token)
-    .header("access-control-expose-headers")
+    .header("access-control-expose-headers", "x-auth-token")
     .send(_.pick(user, ["email", "username"]));
 };
