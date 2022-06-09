@@ -21,5 +21,8 @@ module.exports.userLogIn = async (req, res, next) => {
 
   const token = user.generateAuthToken();
 
-  return res.header("x-auth-token", token).send("Logged In successfully !");
+  return res
+    .header("x-auth-token", token)
+    .header("access-control-expose-headers")
+    .send("Logged In successfully !");
 };
