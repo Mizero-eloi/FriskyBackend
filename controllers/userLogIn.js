@@ -1,4 +1,4 @@
-const { User, validateUserEntry } = require("../models/User");
+const { User, validateUserEntry, checkEmail } = require("../models/User");
 const bcrypt = require("bcrypt");
 
 module.exports.userLogIn = async (req, res, next) => {
@@ -6,10 +6,23 @@ module.exports.userLogIn = async (req, res, next) => {
   const { error } = validateUserEntry(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  // Verifying if the given email is correct
+  let user;
 
-  let user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).send("Incorrect username or password ");
+  //checking if the userInput is email or username
+  const userInput = checkEmail(req.body.email);
+  console.log("User input: " + userInput);
+  if(userInput){
+
+     // Verifying if the given email is correct
+    user = await User.findOne({ email: req.body.email });
+    if (!user) return res.status(400).send("no account associated with the provided email");
+
+  }
+
+  // Verifying if the given username is correct
+
+  user = await User.findOne({ username: req.body.email });
+  if (!user) return res.status(400).send("Incorrect username or password");
 
   // Verifying if the password
 
