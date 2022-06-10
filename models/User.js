@@ -166,7 +166,7 @@ const validateUserProfile = (profile) => {
 
 const checkEmail = (user) => {
   const schema = Joi.object().keys({
-    email: Joi.string().min(5).max(255).required().email(),
+    userInput: Joi.string().min(5).max(255).required().email(),
   });
 
   return schema.validate(user);

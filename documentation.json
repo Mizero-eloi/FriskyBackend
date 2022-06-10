@@ -65,7 +65,7 @@
             "in": "body",
             "name": "body",
             "properties": {
-              "email or username": {
+              "userInput": {
                 "type": "string",
                 "example": "friskyDev@gmail.com"
               },

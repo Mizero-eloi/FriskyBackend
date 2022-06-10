@@ -2,27 +2,23 @@ const { User, validateUserEntry, checkEmail } = require("../models/User");
 const bcrypt = require("bcrypt");
 
 module.exports.userLogIn = async (req, res, next) => {
-  // verifying the user's input  and terminates if the verification fails
-  const { error } = validateUserEntry(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
 
   let user;
+  // verifying the user's input  and terminates if the verification fails
+  const userInput = req.body.userInput;
+  
+  if (!userInput.includes("@gmail.com") || !userInput.includes("@yahoo.com")){
+      // Verifying if the given username is valid
 
-  //checking if the userInput is email or username
-  const userInput = checkEmail(req.body.email);
-  console.log("User input: " + userInput);
-  if(userInput){
+    user = await User.findOne({ username: req.body.userInput });
+    if (!user) return res.status(400).send("Incorrect username or password");
+  }else{
 
      // Verifying if the given email is correct
-    user = await User.findOne({ email: req.body.email });
+    user = await User.findOne({ email: req.body.userInput });
     if (!user) return res.status(400).send("no account associated with the provided email");
 
   }
-
-  // Verifying if the given username is correct
-
-  user = await User.findOne({ username: req.body.email });
-  if (!user) return res.status(400).send("Incorrect username or password");
 
   // Verifying if the password
 
