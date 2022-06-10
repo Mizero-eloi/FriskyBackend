@@ -159,10 +159,21 @@ const validateUserProfile = (profile) => {
     bio: Joi.string(),
   });
 
+
+
   return schema.validate(profile);
+};
+
+const checkEmail = (user) => {
+  const schema = Joi.object().keys({
+    userInput: Joi.string().min(5).max(255).required().email(),
+  });
+
+  return schema.validate(user);
 };
 
 module.exports.User = User;
 module.exports.validateUserRegistration = validateUserRegistration;
+module.exports.checkEmail = checkEmail;
 module.exports.validateUserEntry = validateUserEntry;
 module.exports.validateUserProfile = validateUserProfile;
