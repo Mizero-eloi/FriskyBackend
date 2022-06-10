@@ -15,13 +15,13 @@ module.exports.userRegistration = async (req, res, next) => {
   // checking if the user  already exists and return it true
 
   let email = await User.findOne({
-    email: req.body.email
+    email: req.body.email,
   });
 
   if (email) return res.status(400).send("Email does already exists !");
 
   let username = await User.findOne({
-    username: req.body.username
+    username: req.body.username,
   });
 
   if (username) return res.status(400).send("Username does already exists !");
@@ -35,5 +35,8 @@ module.exports.userRegistration = async (req, res, next) => {
   // saving the user and providing them token
   await user.save();
   const token = user.generateAuthToken();
-  return res.header("x-auth-token", token).send(_.pick(user, ["email", "username"]));
+  return res
+    .header("x-auth-token", token)
+    .header("access-control-expose-headers", "x-auth-token")
+    .send(_.pick(user, ["email", "username"]));
 };
