@@ -7,17 +7,16 @@ module.exports.userLogIn = async (req, res, next) => {
   // verifying the user's input  and terminates if the verification fails
   const userInput = req.body.userInput;
   
-  if (!userInput.includes("@gmail.com") || !userInput.includes("@yahoo.com")){
-      // Verifying if the given username is valid
-
-    user = await User.findOne({ username: req.body.userInput });
-    if (!user) return res.status(400).send("Incorrect username or password");
-  }else{
-
+  if (userInput.includes("@gmail.com") || userInput.includes("@yahoo.com")){
      // Verifying if the given email is correct
-    user = await User.findOne({ email: req.body.userInput });
-    if (!user) return res.status(400).send("no account associated with the provided email");
+     user = await User.findOne({ email: req.body.userInput });
+     if (!user) return res.status(400).send("no account associated with the provided email");
+     
+  }else{
+     // Verifying if the given username is valid
 
+     user = await User.findOne({ username: req.body.userInput });
+     if (!user) return res.status(400).send("Incorrect username or password");
   }
 
   // Verifying if the password
@@ -34,4 +33,5 @@ module.exports.userLogIn = async (req, res, next) => {
     .header("x-auth-token", token)
     .header("access-control-expose-headers", "x-auth-token")
     .send("Logged In successfully !");
+
 };

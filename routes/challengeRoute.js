@@ -1,6 +1,8 @@
 const express = require("express");
 const auth = require("../middleware/auth");
 const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
 const {
   uploadChallengeCoverPhoto,
   joinChallenge,
@@ -108,11 +110,41 @@ router.post(
   removeVideoFromChallenge
 );
 
+
+
+
+// **************** logic to store image to cloudinary *****************
+
+
+cloudinary.config({
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.api_key,
+  api_secret: process.env.api_secret,
+});
+
+console.log("process.env.cloud_name: " + process.env.cloud_name)
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "ChallengeCoverPhoto",
+  },
+});
+
+const upload = multer({ storage: storage });
+
+
+// ************************** end logic to store image to cloudinary *************************
+
+
+
+
+
 router.post(
   "/uploadChallengeCoverphoto/:challengeId",
   auth,
   validateParameterId("challengeId"),
-  imageUpload.upload.single("coverPhoto"),
+  upload.single("coverPhoto"),
   uploadChallengeCoverPhoto
 );
 

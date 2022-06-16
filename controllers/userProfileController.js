@@ -1,10 +1,14 @@
 const { User, validateUserProfile } = require("../models/User");
 const { updateCollection } = require("../services/queries");
 
+
 module.exports.userProfile = async (req, res, next) => {
   // validate the user's given data and return if it is not valid
   const { error } = validateUserProfile(req.body);
   if (error) return res.status(400).send(error.details[0].message);
+
+  console.log("req.params.userId: "+ req.params.userId);
+  console.log("req.user._id: "+ req.user._id);
 
   // Checking if the profile matches the user updating it
   if (req.user._id != req.params.userId)
@@ -40,4 +44,5 @@ module.exports.updateUserProfilePicture = async (req, res, next) => {
     { profile: req.file.path },
     res
   );
+
 };
