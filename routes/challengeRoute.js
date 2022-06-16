@@ -127,7 +127,7 @@ console.log("process.env.cloud_name: " + process.env.cloud_name)
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "ChallengeCoverPhoto",
+    folder: "ChallengeCoverPhotos",
   },
 });
 
