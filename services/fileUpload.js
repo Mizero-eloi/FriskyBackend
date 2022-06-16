@@ -1,18 +1,15 @@
 const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
 
 class FileUpload {
   static storage;
 
   constructor() {
-    this.storage = multer.diskStorage({
-      destination: function (req, file, cb) {
-        cb(null, "./uploads");
-      },
-      filename: function (req, file, cb) {
-        cb(
-          null,
-          new Date().toISOString().replace(/:/g, "_") + file.originalname
-        );
+    this.storage = new CloudinaryStorage({
+      cloudinary: cloudinary,
+      params: {
+        folder: "FRISKY",
       },
     });
   }
