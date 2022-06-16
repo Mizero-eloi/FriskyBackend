@@ -7,9 +7,6 @@ module.exports.userProfile = async (req, res, next) => {
   const { error } = validateUserProfile(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  console.log("req.params.userId: "+ req.params.userId);
-  console.log("req.user._id: "+ req.user._id);
-
   // Checking if the profile matches the user updating it
   if (req.user._id != req.params.userId)
     return res
