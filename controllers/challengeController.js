@@ -206,43 +206,38 @@ module.exports.challengeSomeone = async (req, res, next) => {
 
 module.exports.joinChallenge = async (req, res, next) => {
 
-  const result = await cloudinary.uploader.upload(req.file.path, {
-    resource_type: "video",
-    chunk_size: 6000000,
-  })
+  // Checking if the logged user is in our database
+  const participant = req.user;
 
-  // // Checking if the logged user is in our database
-  // const participant = req.user;
+  // checking if the given challenge exists
+  let challenge = await Challenge.findById(req.params.challengeId);
+  if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-  // // checking if the given challenge exists
-  // let challenge = await Challenge.findById(req.params.challengeId);
-  // if (!challenge) return res.status(400).send("Challenge does not exist !");
+  // Checking if the user is the owner of the challenge
+  if (challenge.challenger.name === participant.username)
+    return res
+      .status(400)
+      .send("You automatically join the challenge after creating it!");
 
-  // // Checking if the user is the owner of the challenge
-  // if (challenge.challenger.name === participant.username)
-  //   return res
-  //     .status(400)
-  //     .send("You automatically join the challenge after creating it!");
+  // Checking if the user is not already in the competition
+  let competitor =
+    challenge.participants.length > 0 &&
+    challenge.participants.filter((p) => p._id == participant._id);
+  if (competitor[0])
+    return res.status(400).send("You are already a competitor");
 
-  // // Checking if the user is not already in the competition
-  // let competitor =
-  //   challenge.participants.length > 0 &&
-  //   challenge.participants.filter((p) => p._id == participant._id);
-  // if (competitor[0])
-  //   return res.status(400).send("You are already a competitor");
-
-  // updateCollectionPushToArray({
-  //   Collection: Challenge,
-  //   filters: { _id: challenge._id },
-  //   array: "participants",
-  //   updates: {
-  //     _id: participant._id,
-  //     name: participant.username,
-  //     profile: participant.profile,
-  //     challengeVideo: { name: req.file.path },
-  //   },
-  //   res,
-  // });
+  updateCollectionPushToArray({
+    Collection: Challenge,
+    filters: { _id: challenge._id },
+    array: "participants",
+    updates: {
+      _id: participant._id,
+      name: participant.username,
+      profile: participant.profile,
+      challengeVideo: { name: req.file.path },
+    },
+    res,
+  });
 };
 
 module.exports.addVideoToChallenge = async (req, res, next) => {
@@ -255,8 +250,8 @@ module.exports.addVideoToChallenge = async (req, res, next) => {
     challenge.participants.length > 0 &&
     challenge.participants.filter((p) => p.name == req.user.username);
   if (!participant[0]) return res.status(400).send("Paricipant not found!");
-  console.log("The participant: " + participant[0]);
 
+  console.log("req.file" + req.file)
   updateCollectionPushToArray({
     Collection: Challenge,
     filters: {
@@ -571,7 +566,6 @@ module.exports.acceptChallenge = async (req, res, next) => {
     }
   } catch (ex) {
     res.status(500).send("Something went wrong !");
-    console.log("The transaction was aborted due to some errors " + ex);
   } finally {
     await session.endSession();
   }
@@ -580,7 +574,6 @@ module.exports.acceptChallenge = async (req, res, next) => {
 
 module.exports.Winner = async (req, res, next) => {
 
-  console.log(new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''));
 
 // checking if the given challenge exists
   let challenge = await Challenge.findById(req.params.challengeId);
@@ -595,7 +588,6 @@ module.exports.Winner = async (req, res, next) => {
     challenge.participants.length > 0 &&
     challenge.participants.filter((p) => Math.max(p.votes.length));
     
-    console.log("Winner: " + winner + " at time: "+ timeToVote);
 
     if (!winner) {
     return res.status(400).send("There is no winner");
@@ -626,15 +618,12 @@ module.exports.trendingStar = async (req, res, next ) => {
         };
       });
 
-      console.log("The trending challenge is : "+ trendingChallenge);
-      console.log("The number of participants in the trending challenge is : "+ trendingChallenge.participants.length);
-
       // if(!trendingChallenge){
       //   res.status(200).send("Challenge doesn't exist!");
       // }
       let maxVotes = 0;
       let trendingStar = {};
-      console.log("The participants: " + trendingChallenge.participants);
+
       //trending person based on his/her votes from the trending challenge
       await trendingChallenge.participants.filter((p) => {
         if(p.votes.length >= maxVotes){
@@ -643,7 +632,6 @@ module.exports.trendingStar = async (req, res, next ) => {
         };
       });
 
-      console.log("The trending star is : "+ trendingStar);
       res.status(200).send(trendingStar);
 
 }
@@ -654,7 +642,6 @@ module.exports.getAllParticipants = async (req, res, next) => {
   const challenge = await Challenge.findById(challengeId);
   if(!challenge) return res.status(400).send("There is no challenge with the specified id");
   const participants = challenge.participants;
-  console.log("The participants: " + participants);
 
   res.status(200).send(participants);
 
