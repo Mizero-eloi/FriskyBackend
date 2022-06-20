@@ -122,8 +122,6 @@ cloudinary.config({
   api_secret: process.env.api_secret,
 });
 
-console.log("process.env.cloud_name: " + process.env.cloud_name)
-
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -139,7 +137,6 @@ const upload = multer({ storage: storage });
 
 
 
-
 router.post(
   "/uploadChallengeCoverphoto/:challengeId",
   auth,
@@ -151,8 +148,7 @@ router.post(
 router.post(
   "/joinChallenge/:challengeId",
   auth,
-  validateParameterId("challengeId"),
-  videoUpload.upload.single("challengeVideo"),
+  validateParameterId("challengeId"),  
   joinChallenge
 );
 

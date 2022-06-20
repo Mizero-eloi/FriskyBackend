@@ -20,6 +20,8 @@ const {
 const { startSession } = require("mongoose");
 const { isEmpty } = require("lodash");
 const schedule = require("node-schedule");
+const cloudinary = require("cloudinary").v2;
+
 
 module.exports.createChallenge = async (req, res, next) => {
   // validating the user's input(for make challenge form )
@@ -203,39 +205,44 @@ module.exports.challengeSomeone = async (req, res, next) => {
 };
 
 module.exports.joinChallenge = async (req, res, next) => {
-  // Checking if the logged user is in our database
-  const participant = req.user;
-  console.log(participant);
 
-  // checking if the given challenge exists
-  let challenge = await Challenge.findById(req.params.challengeId);
-  if (!challenge) return res.status(400).send("Challenge does not exist !");
+  const result = await cloudinary.uploader.upload(req.file.path, {
+    resource_type: "video",
+    chunk_size: 6000000,
+  })
 
-  // Checking if the user is the owner of the challenge
-  if (challenge.challenger.name === participant.username)
-    return res
-      .status(400)
-      .send("You automatically join the challenge after creating it!");
+  // // Checking if the logged user is in our database
+  // const participant = req.user;
 
-  // Checking if the user is not already in the competition
-  let competitor =
-    challenge.participants.length > 0 &&
-    challenge.participants.filter((p) => p._id == participant._id);
-  if (competitor[0])
-    return res.status(400).send("You are already a competitor");
+  // // checking if the given challenge exists
+  // let challenge = await Challenge.findById(req.params.challengeId);
+  // if (!challenge) return res.status(400).send("Challenge does not exist !");
 
-  updateCollectionPushToArray({
-    Collection: Challenge,
-    filters: { _id: challenge._id },
-    array: "participants",
-    updates: {
-      _id: participant._id,
-      name: participant.username,
-      profile: participant.profile,
-      challengeVideo: { name: req.file.path },
-    },
-    res,
-  });
+  // // Checking if the user is the owner of the challenge
+  // if (challenge.challenger.name === participant.username)
+  //   return res
+  //     .status(400)
+  //     .send("You automatically join the challenge after creating it!");
+
+  // // Checking if the user is not already in the competition
+  // let competitor =
+  //   challenge.participants.length > 0 &&
+  //   challenge.participants.filter((p) => p._id == participant._id);
+  // if (competitor[0])
+  //   return res.status(400).send("You are already a competitor");
+
+  // updateCollectionPushToArray({
+  //   Collection: Challenge,
+  //   filters: { _id: challenge._id },
+  //   array: "participants",
+  //   updates: {
+  //     _id: participant._id,
+  //     name: participant.username,
+  //     profile: participant.profile,
+  //     challengeVideo: { name: req.file.path },
+  //   },
+  //   res,
+  // });
 };
 
 module.exports.addVideoToChallenge = async (req, res, next) => {
