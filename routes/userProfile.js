@@ -9,6 +9,7 @@ const {
   userProfile,
   updateUserProfilePicture,
 } = require("../controllers/userProfileController");
+
 const validateParameterId = require("../middleware/validateParameterId");
 const router = express.Router();
 

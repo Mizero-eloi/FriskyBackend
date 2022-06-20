@@ -27,10 +27,8 @@ const {
 } = require("../controllers/challengeController");
 
 const validateParameterId = require("../middleware/validateParameterId");
-const { ImageUpload, VideoUpload } = require("../services/fileUpload");
-
-const imageUpload = new ImageUpload();
-const videoUpload = new VideoUpload();
+const { uploadFile } = require("../services/fileUpload");
+const uploadVideos = uploadFile();
 
 const router = express.Router();
 
@@ -71,13 +69,13 @@ router.post(
 router.post(
   "/challengeSomeone",
   auth,
-  videoUpload.upload.single("challengeVideo"),
+  uploadVideos.single("challengeVideo"),
   challengeSomeone
 );
 router.post(
   "/",
   auth,
-  videoUpload.upload.single("challengeVideo"),
+  uploadVideos.single("challengeVideo"),
   createChallenge
 );
 // Route to get all challenges
@@ -99,7 +97,7 @@ router.post(
   "/addVideotoChallenge/:challengeId",
   auth,
   validateParameterId("challengeId"),
-  videoUpload.upload.single("challengeVideo"),
+  uploadVideos.single("challengeVideo"),
   addVideoToChallenge
 );
 
@@ -122,8 +120,6 @@ cloudinary.config({
   api_secret: process.env.api_secret,
 });
 
-console.log("process.env.cloud_name: " + process.env.cloud_name)
-
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -131,11 +127,10 @@ const storage = new CloudinaryStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+const uploadChallengeCover = multer({ storage: storage });
 
 
 // ************************** end logic to store image to cloudinary *************************
-
 
 
 
@@ -144,15 +139,15 @@ router.post(
   "/uploadChallengeCoverphoto/:challengeId",
   auth,
   validateParameterId("challengeId"),
-  upload.single("coverPhoto"),
+  uploadChallengeCover.single("coverPhoto"),
   uploadChallengeCoverPhoto
 );
 
 router.post(
   "/joinChallenge/:challengeId",
   auth,
-  validateParameterId("challengeId"),
-  videoUpload.upload.single("challengeVideo"),
+  validateParameterId("challengeId"),  
+  uploadVideos.single("challengeVideo"),
   joinChallenge
 );
 
