@@ -54,7 +54,6 @@ module.exports.createChallenge = async (req, res, next) => {
           profile: challenger.profile,
         },
         name: req.body.name,
-        prize: req.body.prize || null,
         deadLineToVote: req.body.deadLineToVote,
         deadLineTimeToVote: req.body.deadLineTimeToVote,
       });
@@ -198,7 +197,6 @@ module.exports.challengeSomeone = async (req, res, next) => {
         challengeVideo: { name: req.file.path },
       },
       challenge: req.body.name,
-      prize: req.body.prize,
     },
     res,
   });
@@ -551,7 +549,6 @@ module.exports.acceptChallenge = async (req, res, next) => {
           profile: challengeRequest[0].challenger.profile,
         },
         name: challengeRequest[0].challenge,
-        prize: challengeRequest[0].prize,
       });
 
       await challenge.save({ session });
