@@ -8,12 +8,6 @@ const challengeSchema = new mongoose.Schema({
     maxlength: 50,
     required: true,
   },
-  prize: {
-    type: String,
-    required: true,
-    minlength: 4,
-    maxlength: 50,
-  },
 
   deadLineToVote: {
     type: Date,
