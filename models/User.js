@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 const config = require("config");
 const jwt = require("jsonwebtoken");
-const { toInteger } = require("lodash");
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
